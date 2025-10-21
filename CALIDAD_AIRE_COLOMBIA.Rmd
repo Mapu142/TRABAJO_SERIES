@@ -38,7 +38,7 @@ knitr::kable(head(aire,10),
 ```{r}
 str(aire)
 ```
-
+ghjftkydrfigugffdf,fluyfgfd
 ```{r}
 # Creación de la serie
 serie_pm25 <- ts(aire$promedio_pm25, start = c(2025, 42), frequency = 365)
