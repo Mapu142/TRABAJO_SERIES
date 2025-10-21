@@ -1,0 +1,110 @@
+---
+title: "CALIDAD DE AIRE"
+author:
+  - María Paula Camargo Rincón
+  - Laura Katherin Martinez Castiblanco
+  - Yudy Vanessa Puerres Rosero
+date: "2025-10-20"
+output: pdf_document
+---
+# Directorio 
+```{r}
+setwd("C:/PERSONAL_MAPU/UNIVERSIDADES/NACIONAL/SERIES_DE_TIEMPO_UNIVARIADAS/TRABAJO")
+rm(list=ls())
+```
+
+
+# librerías
+```{r}
+#install.packages("readr")
+#install.packages("knitr")
+#install.packages("forecast")
+library(readr) # Para leer el csv
+library(knitr) # Para obtener la tabla en el pdf a partir de una tabla en r
+library(forecast) # para el lambda de box-cox
+library(tseries) # prueba de estacionariedad adf
+
+```
+
+# Descripción de los datos:
+
+## Base de datos
+```{r}
+aire <- read_csv("datos_todos.csv")
+knitr::kable(head(aire,10),
+             caption = "Primeros 10 datos",
+             digits = 4)  # redondea a 4 decimales
+```
+```{r}
+str(aire)
+```
+
+```{r}
+# Creación de la serie
+serie_pm25 <- ts(aire$promedio_pm25, start = c(2025, 42), frequency = 365)
+# Gráfica
+ts.plot(serie_pm25, col = "darkcyan", lwd = 2,
+        ylab = "PM2.5 promedio diario", xlab = "Tiempo",
+        main = "Serie de tiempo de PM2.5 (diaria)")
+
+```
+Se ve estacionaria
+```{r}
+adf.test(serie_pm25,alternative = "stationary")
+```
+No se ve estacionalidad
+La variación no es constante, se puede considerar una transformación logaritmica o de box cox
+```{r}
+lambda <- BoxCox.lambda(serie_pm25)
+lambda
+
+```
+Como el lambda obtenido fue igual a 1, no se aplicara la transformación de box-cox
+```{r}
+# Transformación logarítmica
+l.serie_pm25 <- log(serie_pm25)
+ts.plot(l.serie_pm25, col = "darkblue",
+        ylab = "log(PM2.5 promedio diario)",
+        main = "Serie transformada logarítmicamente")
+
+```
+
+Parece seguir siendo estacionaria:
+
+```{r}
+adf.test(l.serie_pm25,alternative = "stationary")
+```
+
+# Modelos
+
+```{r}
+par(mfrow=c(1,2))
+acf(l.serie_pm25)
+pacf(l.serie_pm25)
+```
+Pareciera que un MA(2) es adecuado, tal vez un AR(1)
+```{r}
+ma2 <- arima(x = l.serie_pm25,order = c(0,0,2))
+ma2
+ar1 <- arima(x = l.serie_pm25,order = c(1,0,0))
+ar1
+arma1.2 <- arima(x = l.serie_pm25,order = c(1,0,2))
+arma1.2
+```
+
+```{r}
+parametros <- c("intercepto","ar1","ma1","ma2","loglikelihood","AIC")
+resumen <- cbind("Parámetros"=parametros,
+                 "ar1"=c(coef(ar1)[2],coef(ar1)[1],0,0,ar1$loglik,ar1$aic),
+                 "significancia ar1"=c((ar1$coef/sqrt(diag(ar1$var.coef)))[2],
+                                   (ar1$coef/sqrt(diag(ar1$var.coef)))[1],
+                                   0,0,0,0),
+                 "ma2"=c(coef(ma2)[3],0,coef(ma2)[-3],ma2$loglik,ma2$aic),
+                 "significancia ma2"=c((ma2$coef/sqrt(diag(ma2$var.coef)))[3],0,
+                                   (ma2$coef/sqrt(diag(ma2$var.coef)))[-3],
+                                   0,0))
+knitr::kable(resumen,
+             caption = "Tabla de resumen de los modelos",
+             digits = 3,
+             row.names = F)
+```
