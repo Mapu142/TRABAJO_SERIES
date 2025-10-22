@@ -22,6 +22,7 @@ rm(list=ls())
 #install.packages("ggplot2")
 #install.packages(lubridate")
 #install.packages("zoo")
+#install.packages("nortest")
 library(readxl) # Para leer el csv
 library(knitr) # Para obtener la tabla en el pdf a partir de una tabla en r
 library(forecast) # para el lambda de box-cox
@@ -31,6 +32,7 @@ library(dplyr) # para manejo de datos
 library(ggplot2) # para gráficas
 library(lubridate) # fechas
 library(zoo) #imputación de datos faltantes
+library(nortest) # para prueba kolmogorov
 ```
 
 # Descripción de los datos:
@@ -167,37 +169,39 @@ pacf(l.PM2.5)
 ```
 Pareciera que un MA(9) es adecuado, tal vez AR(9)
 ```{r}
-ma9 <- arima(x = l.PM2.5,order = c(0,0,9))
-ma9
 ar9 <- arima(x = l.PM2.5,order = c(9,0,0))
 ar9
-arma9.9 <- arima(x = l.PM2.5,order = c(9,0,9))
-arma9.9
+arma3.2 <- arima(x = l.PM2.5,order = c(3,0,2))
+arma3.2
 ```
 
 ```{r}
 parametros <- c("Intercepto",
                 paste0("ar", 1:9), 
-                paste0("ma", 1:9),
+                paste0("ma", 1:2),
                 "logLik", "AIC")
 resumen <- data.frame(
   "Parámetro" = parametros,
   
   # Modelo AR(9)
-  "AR(9)" = c(coef(ar9)[10],coef(ar9)[-10], rep(NA, 9), ar9$loglik, ar9$aic),
+  "AR(9)" = c(coef(ar9)[10],coef(ar9)[-10], rep(NA, 2), ar9$loglik, ar9$aic),
   
   # Valor t (significancia) para AR(9)
   "t-valor AR(9)" = c((ar9$coef / sqrt(diag(ar9$var.coef)))[10],
                       (ar9$coef / sqrt(diag(ar9$var.coef)))[-10], 
-                      rep(NA, 9), NA, NA),
+                      rep(NA, 2), NA, NA),
   
   # Modelo MA(9)
-  "MA(9)" = c(coef(ma9)[10],rep(NA, 9), coef(ma9)[-10], ma9$loglik, ma9$aic),
+  "ARMA(3,2)" = c(coef(arma3.2)[6],coef(arma3.2)[1:3],
+                  rep(NA,6), coef(arma3.2)[4:5],
+                  arma3.2$loglik, arma3.2$aic),
   
   # Valor t (significancia) para MA(9)
-  "t-valor MA(9)" = c((ma9$coef / sqrt(diag(ma9$var.coef)))[10],
-                      rep(NA, 9), 
-                      (ma9$coef / sqrt(diag(ma9$var.coef)))[-10], NA, NA)
+  "t-valor MA(9)" = c((arma3.2$coef / sqrt(diag(arma3.2$var.coef)))[6],
+                      (arma3.2$coef / sqrt(diag(arma3.2$var.coef)))[1:3],
+                      rep(NA,6),
+                      (arma3.2$coef / sqrt(diag(arma3.2$var.coef)))[4:5], 
+                      NA, NA)
 )
 knitr::kable(resumen,
              caption = "Tabla de resumen de los modelos",
@@ -205,7 +209,50 @@ knitr::kable(resumen,
              row.names = F)
 ```
 
+# Validación modelos
+## AR(9)
+```{r}
+par(mfrow=c(1,2))
+acf(ar9$residuals)
+pacf(ar9$residuals)
+```
+```{r}
+qqnorm(ar9$residuals)
+qqline(ar9$residuals)
+```
 
 ```{r}
-
+tsdiag(ar9)
 ```
+
+```{r}
+ks.test(ar9$residuals, "pnorm", mean = 0, sd = sd(ar9$residuals))
+shapiro.test(ar9$residuals)
+```
+
+## ARMA(3,2)
+```{r}
+par(mfrow=c(1,2))
+acf(arma3.2$residuals)
+pacf(arma3.2$residuals)
+```
+```{r}
+tsdiag(arma3.2)
+```
+
+```{r}
+qqnorm(arma3.2$residuals)
+qqline(arma3.2$residuals)
+```
+Parace que hay problemas con las colas.
+```{r}
+ks.test(ar9$residuals, "pnorm", mean = 0, sd = sd(arma3.2$residuals))
+shapiro.test(arma3.2$residuals)
+```
+
+
+
+
+
+
+
