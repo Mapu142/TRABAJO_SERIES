@@ -16,63 +16,148 @@ rm(list=ls())
 
 # librerías
 ```{r}
-#install.packages("readr")
+#install.packages("readxl")
 #install.packages("knitr")
 #install.packages("forecast")
-library(readr) # Para leer el csv
+#install.packages("FinTS")
+#install.packages("dplyr")
+#install.packages("ggplot2")
+#install.packages(lubridate")
+#install.packages("zoo")
+library(readxl) # Para leer el csv
 library(knitr) # Para obtener la tabla en el pdf a partir de una tabla en r
 library(forecast) # para el lambda de box-cox
 library(tseries) # prueba de estacionariedad adf
-
+library(FinTS)
+library(dplyr) # para manejo de datos
+library(ggplot2) # para gráficas
+library(lubridate) # fechas
+library(zoo) #imputación de datos faltantes
 ```
 
 # Descripción de los datos:
 
 ## Base de datos
 ```{r}
-aire <- read_csv("datos_todos.csv")
+aire <- read_excel("Datos_India.xlsx")
 knitr::kable(head(aire,10),
              caption = "Primeros 10 datos",
              digits = 4)  # redondea a 4 decimales
 ```
 ```{r}
+# Convert 'City' and 'AQI_Bucket' to factor variables
+aire$City <- as.factor(aire$City)
+aire$AQI_Bucket <- as.factor(aire$AQI_Bucket)
+
+# Convert 'Date' to a date variable, specifying the format
+aire$Date <- as.Date(aire$Date, format = "%d/%m/%Y")
+
+summary(aire)
+
 str(aire)
 ```
-ghjftkydrfigugffdf,fluyfgfd
+## Evaluación de base de datos
+```{r}
+# Group by Date and count the number of entries
+daily_counts <- aire %>%
+  group_by(Date) %>%
+  summarise(count = n())
+
+# Filter for dates with more than one entry
+dates_with_duplicates <- daily_counts %>%
+  filter(count > 1)
+
+
+# Display the dates with duplicate entries
+if (nrow(dates_with_duplicates) > 0) {
+  cat("Días con mas de un valor de  PM2.5:\n")
+  print(dates_with_duplicates)
+} else {
+  cat("No hay días con mas de un valor de PM2.5\n")
+}
+```
+```{r}
+aire[!complete.cases(aire), ]
+# Usar interpolación lineal para rellenar valores faltantes en 'PM2.5'
+# Podemos usar la función na.approx del paquete zoo para la interpolación lineal.
+aire$`PM2.5` <- na.approx(aire$`PM2.5`)
+
+# Verificar que no haya más valores faltantes en 'PM2.5'
+missing_pm25_after_imputation <- sum(is.na(aire$`PM2.5`))
+cat("Número de datos faltantes en 'PM2.5' después de la imputación:", missing_pm25_after_imputation, "\n")
+```
+```{r}
+# Crear un gráfico de línea de la serie 'PM2.5' después de la imputación
+ggplot(aire, aes(x = Date, y = `PM2.5`)) +
+  geom_line() +
+  labs(title = "Serie de PM2.5 después de la imputación",
+       x = "Fecha",
+       y = "PM2.5") +
+  theme_minimal() + # Keep the minimal theme
+
+cat("Estadísticas de resumen de 'PM2.5' después de la imputación:\n")
+print(summary(aire))
+```
+
+
 ```{r}
 # Creación de la serie
-serie_pm25 <- ts(aire$promedio_pm25, start = c(2025, 42), frequency = 365)
+start_date <- min(aire$Date)
+end_date <- max(aire$Date)
+PM2.5 <- ts(aire$`PM2.5`, start = c(year(start_date), month(start_date), day(start_date)), end = c(year(end_date), month(end_date), day(end_date)), frequency = 365)
+
 # Gráfica
-ts.plot(serie_pm25, col = "darkcyan", lwd = 2,
+ts.plot(PM2.5, col = "darkcyan", lwd = 2,
         ylab = "PM2.5 promedio diario", xlab = "Tiempo",
         main = "Serie de tiempo de PM2.5 (diaria)")
 
 ```
-Se ve estacionaria
+Se ve estacionaria por lo menos en media, aunque parece tener distinta variación en algunos intervalos
 ```{r}
-adf.test(serie_pm25,alternative = "stationary")
+par(mfrow=c(1,2))
+acf(PM2.5) # decaimiento lento indica que la serie no es estacionaria
+pacf(PM2.5)
 ```
-No se ve estacionalidad
+
+```{r}
+adf_result <- adf.test(PM2.5, alternative = "stationary")
+cat("Prueba ADF:\n Estadístico =", round(adf_result$statistic, 4),
+    ", p-valor =", adf_result$p.value, "\n")
+```
+```{r}
+# Estadísticas descriptivas
+summary_stats <- aire %>%
+  summarise(
+    Media = mean(PM2.5, na.rm = TRUE),
+    Mediana = median(PM2.5, na.rm = TRUE),
+    Desv_Est = sd(PM2.5, na.rm = TRUE),
+    Min = min(PM2.5, na.rm = TRUE),
+    Max = max(PM2.5, na.rm = TRUE)
+  )
+
+kable(summary_stats, digits = 3, caption = "Estadísticas descriptivas de PM2.5 ")
+```
+
 La variación no es constante, se puede considerar una transformación logaritmica o de box cox
 ```{r}
-lambda <- BoxCox.lambda(serie_pm25)
+lambda <- BoxCox.lambda(PM2.5)
 lambda
 
 ```
-Como el lambda obtenido fue igual a 1, no se aplicara la transformación de box-cox
+Como el lambda obtenido fue cercano a 0, se aplicará la transformación de logaritmica.
 ```{r}
 # Transformación logarítmica
-l.serie_pm25 <- log(serie_pm25)
-ts.plot(l.serie_pm25, col = "darkblue",
+l.PM2.5 <- log(PM2.5)
+ts.plot(l.PM2.5, col = "darkblue",
         ylab = "log(PM2.5 promedio diario)",
         main = "Serie transformada logarítmicamente")
 
 ```
 
-Parece seguir siendo estacionaria:
+Parece seguir siendo estacionaria en media:
 
 ```{r}
-adf.test(l.serie_pm25,alternative = "stationary")
+adf.test(l.PM2.5,alternative = "stationary")
 ```
 
 # Modelos
