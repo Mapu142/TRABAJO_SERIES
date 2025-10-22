@@ -7,9 +7,7 @@ author:
 date: "2025-10-20"
 output: pdf_document
 ---
-# Directorio 
 ```{r}
-setwd("C:/PERSONAL_MAPU/UNIVERSIDADES/NACIONAL/SERIES_DE_TIEMPO_UNIVARIADAS/TRABAJO")
 rm(list=ls())
 ```
 
@@ -164,32 +162,50 @@ adf.test(l.PM2.5,alternative = "stationary")
 
 ```{r}
 par(mfrow=c(1,2))
-acf(l.serie_pm25)
-pacf(l.serie_pm25)
+acf(l.PM2.5)
+pacf(l.PM2.5)
 ```
-Pareciera que un MA(2) es adecuado, tal vez un AR(1)
+Pareciera que un MA(9) es adecuado, tal vez AR(9)
 ```{r}
-ma2 <- arima(x = l.serie_pm25,order = c(0,0,2))
-ma2
-ar1 <- arima(x = l.serie_pm25,order = c(1,0,0))
-ar1
-arma1.2 <- arima(x = l.serie_pm25,order = c(1,0,2))
-arma1.2
+ma9 <- arima(x = l.PM2.5,order = c(0,0,9))
+ma9
+ar9 <- arima(x = l.PM2.5,order = c(9,0,0))
+ar9
+arma9.9 <- arima(x = l.PM2.5,order = c(9,0,9))
+arma9.9
 ```
 
 ```{r}
-parametros <- c("intercepto","ar1","ma1","ma2","loglikelihood","AIC")
-resumen <- cbind("Parámetros"=parametros,
-                 "ar1"=c(coef(ar1)[2],coef(ar1)[1],0,0,ar1$loglik,ar1$aic),
-                 "significancia ar1"=c((ar1$coef/sqrt(diag(ar1$var.coef)))[2],
-                                   (ar1$coef/sqrt(diag(ar1$var.coef)))[1],
-                                   0,0,0,0),
-                 "ma2"=c(coef(ma2)[3],0,coef(ma2)[-3],ma2$loglik,ma2$aic),
-                 "significancia ma2"=c((ma2$coef/sqrt(diag(ma2$var.coef)))[3],0,
-                                   (ma2$coef/sqrt(diag(ma2$var.coef)))[-3],
-                                   0,0))
+parametros <- c("Intercepto",
+                paste0("ar", 1:9), 
+                paste0("ma", 1:9),
+                "logLik", "AIC")
+resumen <- data.frame(
+  "Parámetro" = parametros,
+  
+  # Modelo AR(9)
+  "AR(9)" = c(coef(ar9)[10],coef(ar9)[-10], rep(NA, 9), ar9$loglik, ar9$aic),
+  
+  # Valor t (significancia) para AR(9)
+  "t-valor AR(9)" = c((ar9$coef / sqrt(diag(ar9$var.coef)))[10],
+                      (ar9$coef / sqrt(diag(ar9$var.coef)))[-10], 
+                      rep(NA, 9), NA, NA),
+  
+  # Modelo MA(9)
+  "MA(9)" = c(coef(ma9)[10],rep(NA, 9), coef(ma9)[-10], ma9$loglik, ma9$aic),
+  
+  # Valor t (significancia) para MA(9)
+  "t-valor MA(9)" = c((ma9$coef / sqrt(diag(ma9$var.coef)))[10],
+                      rep(NA, 9), 
+                      (ma9$coef / sqrt(diag(ma9$var.coef)))[-10], NA, NA)
+)
 knitr::kable(resumen,
              caption = "Tabla de resumen de los modelos",
              digits = 3,
              row.names = F)
+```
+
+
+```{r}
+
 ```
