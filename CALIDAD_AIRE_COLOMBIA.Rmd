@@ -247,7 +247,18 @@ Parace que hay problemas con las colas.
 ks.test(ar9$residuals, "pnorm", mean = 0, sd = sd(arma3.2$residuals))
 shapiro.test(arma3.2$residuals)
 ```
+## Gráficas de los modelos y la serie
+```{r}
+plot(l.PM2.5, type = "l", col = "black", lwd = 2, main = "Ajuste del modelo AR(9)")
+lines(fitted(ar9), col = "red", lwd = 2)
+legend("bottomleft", legend = c("Serie original", "Ajuste AR(9)"),
+       col = c("black", "red"), lwd = 2)
+plot(l.PM2.5, type = "l", col = "black", lwd = 2, main = "Ajuste del modelo ARMA(3,2)")
+lines(fitted(arma3.2), col = "red", lwd = 2)
+legend("bottomleft", legend = c("Serie original", "Ajuste ARMA(3,2)"),
+       col = c("black", "red"), lwd = 2)
 
+```
 
 
 
