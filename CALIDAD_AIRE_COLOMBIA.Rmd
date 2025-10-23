@@ -333,9 +333,6 @@ $$
 Z_t = \mu + \phi_1 Z_{t-1} + \phi_2 Z_{t-2} + a_t + \theta_1 a_{t-1} + \theta_2 a_{t-2} $$
 $$ = 4.593 + 1.38 Z_{t-1} -0.388 Z_{t-2} + a_t + \theta_1 a_{t-1} + \theta_2 a_{t-2}$$
 
-- *Formula ARIMA(1,1,2)*
-
-$$\triangledown Z_{t}=0.216Z_{t-1}+a_{t}-0.428a_{t-1}-0.381a_{t-2}$$
 
 - *Formula ARIMA(2,1,2)*
 
@@ -346,16 +343,13 @@ Se presentan a continuación las formulas de los modelos con las estimaciones de
 - *Formula ARMA(2,2)*
 
 $$Z_{t}=4.593Z_{t-1}-0.388Z_{t-2}+a_{t}-0.595a_{t-1}-0.209a_{t-2}+4.593$$
-- *Formula ARIMA(1,1,2)*
-
-$$\triangledown Z_{t}=0.216Z_{t-1}+a_{t}-0.428a_{t-1}-0.381a_{t-2}$$
 
 
 - *Formula ARIMA(2,1,2)*
 
 $$\triangledown Z_{t}=0.216Z_{t-1}+a_{t}-0.428a_{t-1}-0.381a_{t-2}$$
 
-Para el modelo ARIMA(2,1,2) parece "reducirce" al modelo ARIMA(1,1,2)
+Para el modelo ARIMA(2,1,2) parece "reducirce" a un modelo ARIMA(1,1,2)
 # Validación modelos
 ## ARMA(2,2)
 ```{r}
