@@ -20,7 +20,7 @@ rm(list=ls())
 #install.packages("FinTS")
 #install.packages("dplyr")
 #install.packages("ggplot2")
-#install.packages(lubridate")
+#install.packages("lubridate")
 #install.packages("zoo")
 #install.packages("nortest")
 library(readxl) # Para leer el csv
