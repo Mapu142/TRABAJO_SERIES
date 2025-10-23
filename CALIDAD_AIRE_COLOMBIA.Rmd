@@ -41,7 +41,7 @@ library(nortest) # para prueba kolmogorov
 
 La base de datos utilizada proviene del conjunto de datos público disponible en la plataforma Kaggle ([Rohan Rao, 2020 ](https://www.kaggle.com/datasets/rohanrao/air-quality-data-in-india)). Este conjunto fue recopilado originalmente por el Central Pollution Control Board (CPCB**)**, organismo oficial del Gobierno de la India encargado del monitoreo ambiental.
 
-Para este estudio, se utilizó la versión diaria del conjunto de datos, enfocándose exclusivamente en la variable PM2.5 (µg/m³) (partículas en suspensión con diámetro aerodinámico ≤ 2.5 µm) registrada en la ciudad de Delhi. La serie abarca el período comprendido entre el 1 de enero de 2015 y el 6 de diciembre de 2020, con observaciones diarias.
+Para este estudio, se utilizó la versión diaria del conjunto de datos, enfocándose exclusivamente en la variable PM2.5 (µg/m³) (partículas en suspensión con diámetro aerodinámico $\leq$ 2.5 µm) registrada en la ciudad de Delhi. La serie abarca el período comprendido entre el 1 de enero de 2015 y el 6 de diciembre de 2020, con observaciones diarias.
 ```{r}
 aire <- read_excel("Datos_India.xlsx")
 knitr::kable(head(aire,10),
@@ -136,7 +136,7 @@ adf_result <- adf.test(PM2.5, alternative = "stationary")
 cat("Prueba ADF:\n Estadístico =", round(adf_result$statistic, 4),
     ", p-valor =", adf_result$p.value, "\n")
 ```
-Dada la heterocedasticidad, se evaluo una transformación para estabilizar la varianza. Se estimó el parámetro de Box-Cox, obteniéndo λ ≈ 0.257, cercano a cero. Por lo cual se aplicó la transformación logarítmica.
+Dada la heterocedasticidad, se evaluo una transformación para estabilizar la varianza. Se estimó el parámetro de Box-Cox, obteniéndo $\lambda$ $\approx$ 0.257, cercano a cero. Por lo cual se aplicó la transformación logarítmica.
 
 ```{r}
 lambda <- BoxCox.lambda(PM2.5)
@@ -152,7 +152,7 @@ ts.plot(l.PM2.5, col = "darkblue",
         main = "Serie transformada logarítmicamente")
 
 ```
-La serie transformada presenta una varianza más homogénea y mantiene la estacionariedad en media (prueba ADF con p-valor ≈ 0.027), cumpliendo así los supuestos de estacionariedad para el ajuste de modelos ARIMA.
+La serie transformada presenta una varianza más homogénea y mantiene la estacionariedad en media (prueba ADF con p-valor $\approx$ 0.027), cumpliendo así los supuestos de estacionariedad para el ajuste de modelos ARIMA.
 
 ```{r}
 adf.test(l.PM2.5,alternative = "stationary")
@@ -165,7 +165,7 @@ par(mfrow=c(1,2))
 acf(l.PM2.5)
 pacf(l.PM2.5)
 ```
-Pareciera que un MA(9) es adecuado, tal vez AR(9)
+Pareciera que un ARMA(3,2) es adecuado, tal vez AR(9).
 ```{r}
 ar9 <- arima(x = l.PM2.5,order = c(9,0,0))
 ar9
@@ -247,7 +247,18 @@ Parace que hay problemas con las colas.
 ks.test(ar9$residuals, "pnorm", mean = 0, sd = sd(arma3.2$residuals))
 shapiro.test(arma3.2$residuals)
 ```
+## Gráficas de los modelos y la serie
+```{r}
+plot(l.PM2.5, type = "l", col = "black", lwd = 2, main = "Ajuste del modelo AR(9)")
+lines(fitted(ar9), col = "red", lwd = 2)
+legend("bottomleft", legend = c("Serie original", "Ajuste AR(9)"),
+       col = c("black", "red"), lwd = 2)
+plot(l.PM2.5, type = "l", col = "black", lwd = 2, main = "Ajuste del modelo ARMA(3,2)")
+lines(fitted(arma3.2), col = "red", lwd = 2)
+legend("bottomleft", legend = c("Serie original", "Ajuste ARMA(3,2)"),
+       col = c("black", "red"), lwd = 2)
 
+```
 
 
 
