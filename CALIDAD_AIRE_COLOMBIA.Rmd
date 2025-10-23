@@ -207,6 +207,26 @@ knitr::kable(resumen,
              row.names = F)
 ```
 
+Se presentan a continuación las formulas de los modelos con los coeficientes estimados.
+
+- *Formula AR(9)*
+
+$Z_{t}=0.789Z_{t-1}-0.125Z_{t-2}+0.139Z_{t-3}+0.011Z_{t-4}-0.015Z_{t-5}+0.043Z_{t-6}+0.001Z_{t-7}+0.049Z_{t-8}+0.061Z_{t-9}+a_{t}+4.599$
+
+- *Formula ARMA(3,2)*
+
+$Z_{t}=1.205Z_{t-1}-0.090Z_{t-2}-0.122Z_{t-3}+a_{t}-0.422a_{t-1}-0.368a_{t-2}+4.605$
+
+Se presentan a continuación las formulas de los modelos con las estimaciones de los coeficientes significativos:
+
+- *Formula AR(9)*
+
+$$Z_{t}=0.789Z_{t-1}-0.125Z_{t-2}+0.139Z_{t-3}+0.061Z_{t-9}+a_{t}+4.599$$
+
+- *Formula ARMA(3,2)*
+
+$$Z_{t}=1.205Z_{t-1}+a_{t}-0.422a_{t-1}-0.368a_{t-2}+4.605$$
+
 # Validación modelos
 ## AR(9)
 ```{r}
