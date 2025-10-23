@@ -255,53 +255,84 @@ knitr::kable(comparacion,
 
 
 
+Se observa que el ARMA(2,2) es el modelo que tiene el mejor ajuste en
+terminos del error, seguido por el modelo ARIMA (2,1,2) a diferencia de
+lo sugerido por la función `auto.arima()` , por lo que se prefiere
+trabajar con estos dos modelos en adelante.
+
 ```{r}
 
 # Nombres de parámetros (8 filas)
 parametros <- c("Intercepto", "ar1", "ar2", "ma1", "ma2", "logLik", "AIC", "BIC")
 
-# Extraer coeficientes y estadísticos
-# ARMA(2,2): tiene intercepto, ar1, ar2, ma1, ma2
-coef_arma <- coef(arma2.2)
-t_arma <- coef_arma / sqrt(diag(arma2.2$var.coef))
+# --- Modelo ARMA(2,2) ---
+coef_arma <- coef(arma2.2)  # Tiene: ar1, ar2, ma1, ma2, intercept
+# Aseguramos el orden: intercept, ar1, ar2, ma1, ma2
+coef_arma_ordenado <- c(
+  coef_arma["intercept"],
+  coef_arma["ar1"],
+  coef_arma["ar2"],
+  coef_arma["ma1"],
+  coef_arma["ma2"]
+)
+t_arma_ordenado <- coef_arma_ordenado / c(
+  sqrt(arma2.2$var.coef["intercept", "intercept"]),
+  sqrt(arma2.2$var.coef["ar1", "ar1"]),
+  sqrt(arma2.2$var.coef["ar2", "ar2"]),
+  sqrt(arma2.2$var.coef["ma1", "ma1"]),
+  sqrt(arma2.2$var.coef["ma2", "ma2"])
+)
 
-# ARIMA(1,1,2): NO tiene intercepto, solo ar1, ma1, ma2 → ar2 = NA
-coef_arima <- c(NA, arima2.1.2$coef["ar1"], NA, 
-                arima2.1.2$coef["ma1"], arima2.1.2$coef["ma2"])
-t_arima <- c(NA, 
-             arima2.1.2$coef["ar1"] / sqrt(arima2.1.2$var.coef["ar1","ar1"]),
-             NA,
-             arima2.1.2$coef["ma1"] / sqrt(arima2.1.2$var.coef["ma1","ma1"]),
-             arima2.1.2$coef["ma2"] / sqrt(arima2.1.2$var.coef["ma2","ma2"]))
+# --- Modelo ARIMA(2,1,2) ---
+# Este modelo NO tiene intercepto (porque d = 1), pero SÍ tiene ar1 y ar2
+coef_arima212 <- coef(arima2.1.2)  # Debe tener: ar1, ar2, ma1, ma2
+coef_arima212_ordenado <- c(
+  NA,  # Intercepto
+  coef_arima212["ar1"],
+  coef_arima212["ar2"],
+  coef_arima212["ma1"],
+  coef_arima212["ma2"]
+)
 
-# Construir tabla
+# Valores t para ARIMA(2,1,2)
+t_arima212_ordenado <- c(
+  NA,
+  coef_arima212["ar1"] / sqrt(arima2.1.2$var.coef["ar1", "ar1"]),
+  coef_arima212["ar2"] / sqrt(arima2.1.2$var.coef["ar2", "ar2"]),
+  coef_arima212["ma1"] / sqrt(arima2.1.2$var.coef["ma1", "ma1"]),
+  coef_arima212["ma2"] / sqrt(arima2.1.2$var.coef["ma2", "ma2"])
+)
+
+# --- Construir tabla ---
 resumen <- data.frame(
   Parámetro = parametros,
   
-  "ARMA(2,2)" = c(coef_arma, arma2.2$loglik, arma2.2$aic, BIC(arma2.2)),
-  "t-valor ARMA(2,2)" = c(t_arma, NA, NA, NA),
+  "ARMA(2,2)" = c(coef_arma_ordenado, arma2.2$loglik, arma2.2$aic, BIC(arma2.2)),
+  "t-valor ARMA(2,2)" = c(t_arma_ordenado, NA, NA, NA),
   
-  "ARIMA(1,1,2)" = c(coef_arima, arima2.1.2$loglik, arima2.1.2$aic, BIC(arima2.1.2)),
-  "t-valor ARIMA(1,1,2)" = c(t_arima, NA, NA, NA),
+  "ARIMA(2,1,2)" = c(coef_arima212_ordenado, arima2.1.2$loglik, arima2.1.2$aic, BIC(arima2.1.2)),
+  "t-valor ARIMA(2,1,2)" = c(t_arima212_ordenado, NA, NA, NA),
   stringsAsFactors = FALSE
 )
 
-knitr::kable(resumen,
-             caption = "Tabla de resumen de los modelos ARMA(2,2) y ARIMA(1,1,2)",
-             digits = 3,
-             row.names = FALSE)
+knitr::kable(
+  resumen,
+  caption = "Tabla de resumen de los modelos ARMA(2,2) y ARIMA(2,1,2)",
+  digits = 3,
+  row.names = FALSE
+)
 ```
 
+Se presentan a continuación las formulas de los modelos con los
+coeficientes estimados de la serie transformada $\log(\text{PM}_{2.5})$,
+denotada como $Z_t$:.
 
-Se presentan a continuación las formulas de los modelos con los coeficientes estimados.
+-   *Formula ARMA(2,2)*
 
-- *Formula ARMA(2,2)*
+$$
+Z_t = \mu + \phi_1 Z_{t-1} + \phi_2 Z_{t-2} + a_t + \theta_1 a_{t-1} + \theta_2 a_{t-2} $$
+$$ = 4.593 + 1.38 Z_{t-1} -0.388 Z_{t-2} + a_t + \theta_1 a_{t-1} + \theta_2 a_{t-2}$$
 
-$$Z_{t}=4.593Z_{t-1}-0.388Z_{t-2}+a_{t}-0.595a_{t-1}-0.209a_{t-2}+4.593$$
-
-- *Formula ARIMA(1,1,2)*
-
-$$\triangledown Z_{t}=0.216Z_{t-1}+a_{t}-0.428a_{t-1}-0.381a_{t-2}$$
 
 - *Formula ARIMA(2,1,2)*
 
@@ -312,16 +343,13 @@ Se presentan a continuación las formulas de los modelos con las estimaciones de
 - *Formula ARMA(2,2)*
 
 $$Z_{t}=4.593Z_{t-1}-0.388Z_{t-2}+a_{t}-0.595a_{t-1}-0.209a_{t-2}+4.593$$
-- *Formula ARIMA(1,1,2)*
-
-$$\triangledown Z_{t}=0.216Z_{t-1}+a_{t}-0.428a_{t-1}-0.381a_{t-2}$$
 
 
 - *Formula ARIMA(2,1,2)*
 
 $$\triangledown Z_{t}=0.216Z_{t-1}+a_{t}-0.428a_{t-1}-0.381a_{t-2}$$
 
-Para el modelo ARIMA(2,1,2) parece "reducirce" al modelo ARIMA(1,1,2)
+Para el modelo ARIMA(2,1,2) parece "reducirce" a un modelo ARIMA(1,1,2)
 # Validación modelos
 ## ARMA(2,2)
 ```{r}
