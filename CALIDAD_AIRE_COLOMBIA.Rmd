@@ -22,7 +22,7 @@ rm(list=ls())
 #install.packages("FinTS")
 #install.packages("dplyr")
 #install.packages("ggplot2")
-#install.packages(lubridate")
+#install.packages("lubridate")
 #install.packages("zoo")
 library(readxl) # Para leer el csv
 library(knitr) # Para obtener la tabla en el pdf a partir de una tabla en r
