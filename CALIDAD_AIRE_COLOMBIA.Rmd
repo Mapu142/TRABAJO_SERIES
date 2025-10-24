@@ -305,7 +305,7 @@ t_arima212_ordenado <- c(
 
 # --- Construir tabla ---
 resumen <- data.frame(
-  Parámetro = parametros,
+  "Parámetro" = parametros,
   
   "ARMA(2,2)" = c(coef_arma_ordenado, arma2.2$loglik, arma2.2$aic, BIC(arma2.2)),
   "t-valor ARMA(2,2)" = c(t_arma_ordenado, NA, NA, NA),
@@ -334,33 +334,31 @@ Z_t = \mu + \phi_1 Z_{t-1} + \phi_2 Z_{t-2} + a_t + \theta_1 a_{t-1} + \theta_2 
 $$ = 4.593 + 1.38 Z_{t-1} -0.388 Z_{t-2} + a_t + \theta_1 a_{t-1} + \theta_2 a_{t-2}$$
 
 
-- *Formula ARIMA(2,1,2)*
+-   Formula ARIMA(2,1,2)
 
-$$\triangledown Z_{t}=0.216Z_{t-1}+0.134Z_{t-2}+a_{t}-0.428a_{t-1}-0.381a_{t-2}$$
-
-Se presentan a continuación las formulas de los modelos con las estimaciones de los coeficientes significativos:
-
-- *Formula ARMA(2,2)*
-
-$$Z_{t}=4.593Z_{t-1}-0.388Z_{t-2}+a_{t}-0.595a_{t-1}-0.209a_{t-2}+4.593$$
-
-
-- *Formula ARIMA(2,1,2)*
-
-$$\triangledown Z_{t}=0.216Z_{t-1}+a_{t}-0.428a_{t-1}-0.381a_{t-2}$$
+$$\nabla Z_{t}=\phi_1 \nabla Z_{t-1} + \phi_2 \nabla Z_{t-2} + a_t + \theta_1 a_{t-1} + \theta_2 a_{t-2}$$
+$$ =0.216 \nabla Z_{t-1}+0.134 \nabla Z_{t-2}+a_{t}-0.428a_{t-1}-0.381a_{t-2} $$
 
 Para el modelo ARIMA(2,1,2) parece "reducirce" a un modelo ARIMA(1,1,2)
 # Validación modelos
 ## ARMA(2,2)
 ```{r}
+arma22_ar <- arma2.2$coef[grep("^ar", names(arma2.2$coef))]  # c(ar1, ar2)
+arma22_ma <- arma2.2$coef[grep("^ma", names(arma2.2$coef))]  # c(ma1, ma2)
+
 par(mfrow = c(1, 2))
+# ACF
 acf(l.PM2.5, main = "ACF empírica")
-plotArmaTrueacf(list(ar = arma2.2$coef["ar2"]), main = "ACF teórica ARMA(2,2)")
+FinTS::plotArmaTrueacf(list(ar = arma22_ar, ma = arma22_ma), 
+                       main = "ACF teórica ARMA(2,2)")
 
+# PACF
 pacf(l.PM2.5, main = "PACF empírica")
-plotArmaTrueacf(list(ar = arma2.2$coef["ar2"]), pacf = TRUE, main = "PACF teórica ARMA(2,2)")
+FinTS::plotArmaTrueacf(list(ar = arma22_ar, ma = arma22_ma), 
+                       pacf = TRUE, 
+                       main = "PACF teórica ARMA(2,2)")
 ```
-
+La serie logaritmica parece tener un comportamiento similar a un modelo ARMA(2,2), lo que nos puede indicar que el modelo se puede ajustar bien a los datos.
 ```{r}
 par(mfrow=c(1,2))
 acf(arma2.2$residuals)
@@ -387,13 +385,36 @@ shapiro.test(arma2.2$residuals)
 Respecto a la normalidad, el p-valor fue menor al nivel de significancia por lo que se rechaza la hipotesis nula de que los residuales provienen de una distribución normal.
 ## ARIMA(2,1,2)
 ```{r}
-par(mfrow = c(1, 2))
-acf(d.l.PM2.5, main = "ACF empírica")
-plotArmaTrueacf(list(ar = arima2.1.2$coef["ar2"]), main = "ACF teórica ARiMA(2,1,2)")
+# Extraer coeficientes del modelo ARIMA(2,1,2)
+arima212_ar <- arima2.1.2$coef[grep("^ar", names(arima2.1.2$coef))]
+arima212_ma <- arima2.1.2$coef[grep("^ma", names(arima2.1.2$coef))]
 
-pacf(d.l.PM2.5, main = "PACF empírica")
-plotArmaTrueacf(list(ar = arima2.1.2$coef["ar2"]), pacf = TRUE, main = "PACF teórica ARIMA(2,1,2)")
+# Calcular límites comunes para Y (basados en la PACF empírica)
+pacf_empirica <- pacf(d.l.PM2.5, lag.max = 20, plot = FALSE)
+
+# Gráficos con escalas sincronizadas
+par(mfrow = c(1, 2))
+
+# ACF empírica vs teórica (sobre la serie diferenciada)
+acf(d.l.PM2.5, main = "ACF empírica de $\triangledown$log(PM2.5)")
+FinTS::plotArmaTrueacf(
+  list(ar = arima212_ar, ma = arima212_ma),
+  main = "ACF teórica del ARIMA(2,1,2)"
+)
+
+
+# PACF empírica vs teórica
+pacf(d.l.PM2.5, lag.max = 20, main = "PACF empírica de $\triangledown$log(PM2.5)", ylim = range(c(pacf_empirica$acf, -0.25, 0.25)) )
+
+FinTS::plotArmaTrueacf(
+  list(ar = arima212_ar, ma = arima212_ma),
+  pacf = TRUE,
+  main = "PACF teórica del ARIMA(2,1,2) ",
+  lag.max = 20,
+  ylim = range(c(pacf_empirica$acf, -0.25, 0.25))  # ajusta según necesidad
+)
 ```
+La serie logaritmica diferenciada parece tener un comportamiento similar al de un modelo ARIMA(2,1,2), por lo que este podría ser un indicio de que el modelo se puede ajustar bien a los datos.
 ```{r}
 par(mfrow=c(1,2))
 acf(arima2.1.2$residuals)
@@ -433,7 +454,8 @@ legend("bottomleft", legend = c("Serie logaritmica", "Ajuste ARIMA(2,1,2)"),
 Ambos modelos parecen ajustarse bien a los datos.
 
 # Selección del mejor modelo
-Recordando que el modelo ARMA(2,2) obtuvo mejores AIC, y loglik que el modelo ARIMA(2,1,2), y observando que ambos modelos tienen un comportamiento similar en los residuales y que ambos parecen ajustarse bien a los datos, por criterio de parsimonio el mejor modelo es el ARMA(2,2)
+
+Ambos modelos parecen ajustarse bien a los datos, ambos modelos carecen de normalidad, por lo que las pruebas de significancia de los parámetros no son válidas, así mismo pierden válidez los criterios AIC y BIC, sin embargo, teniendo en cuenta que ambos modelos se comportan de manera similar, y que el modelo ARMA(2,2) tiene menor RMSE, se ha seleccionado como el mejor modelo de ambos.
 
 
 
