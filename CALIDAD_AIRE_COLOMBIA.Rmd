@@ -207,7 +207,7 @@ no se puede definir con certeza cuál sería la estructura de MA (Media
 Móvil). Por ello, se prueba el ARMA(2,2) ( sugerido por la función
 `auto.arima(log(PM2.5))`), el otro modelo
 es un modelo ARIMA(1,1,2) (a su vez sugerido por
-`auto.arima(Δlog(PM2.5))`). Adicinalmente se prueba un modelo ARIMA(2,1,2) puesto que se puede comparar la serie sin diferenciar propuesta con la misma pero diferenciandola.
+`auto.arima($\triangle$log(PM2.5))`). Adicinalmente se prueba un modelo ARIMA(2,1,2) puesto que se puede comparar la serie sin diferenciar propuesta con la misma pero diferenciandola.
 
 ```{r}
 auto.arima(l.PM2.5, seasonal = FALSE)
