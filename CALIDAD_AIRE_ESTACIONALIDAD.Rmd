@@ -1,0 +1,184 @@
+---
+title: "CALIDAD_AIRE_ESTACIONALIDAD"
+author:
+  - María Paula Camargo Rincón
+  - Laura Katherin Martinez Castiblanco
+  - Yudy Vanessa Puerres Rosero
+date: "2025-11-15"
+output: pdf_document
+---
+
+```{r}
+rm(list=ls())
+```
+
+
+# librerías
+```{r, show=F}
+#install.packages("readxl")
+#install.packages("knitr")
+#install.packages("forecast")
+#install.packages("FinTS")
+#install.packages("dplyr")
+#install.packages("ggplot2")
+#install.packages("lubridate")
+#install.packages("zoo")
+#install.packages("nortest")
+library(readxl) # Para leer el csv
+library(knitr) # Para obtener la tabla en el pdf a partir de una tabla en r
+library(forecast) # para el lambda de box-cox
+library(tseries) # prueba de estacionariedad adf
+library(FinTS)
+library(dplyr) # para manejo de datos
+library(ggplot2) # para gráficas
+library(lubridate) # fechas
+library(zoo) #imputación de datos faltantes
+library(nortest) # para prueba kolmogorov
+```
+
+# Descripción de los datos:
+
+## Base de datos
+
+La base de datos utilizada proviene del conjunto de datos público disponible en la plataforma Kaggle ([Rohan Rao, 2020 ](https://www.kaggle.com/datasets/rohanrao/air-quality-data-in-india)). Este conjunto fue recopilado originalmente por el Central Pollution Control Board (CPCB**)**, organismo oficial del Gobierno de la India encargado del monitoreo ambiental.
+
+Para este estudio, se utilizó la versión diaria del conjunto de datos, enfocándose exclusivamente en la variable PM2.5 (µg/m³) (partículas en suspensión con diámetro aerodinámico $\leq$ 2.5 µm) registrada en la ciudad de Delhi. La serie abarca el período comprendido entre el 1 de enero de 2015 y el 6 de diciembre de 2020, con observaciones diarias.
+```{r}
+aire <- read_excel("Datos_India.xlsx")
+knitr::kable(head(aire,10),
+             caption = "Primeros 10 datos",
+             digits = 4)  # redondea a 4 decimales
+```
+Además de PM2.5, el conjunto incluye el Índice de Calidad del Aire (AQI) y su clasificación categórica (*AQI_Bucket*), que divide la calidad del aire en seis niveles: *Good*, *Satisfactory*, *Moderate*, *Poor*, *Very Poor* y *Severe*. Sin embargo, dado que el objetivo del análisis es modelar la dinámica temporal de la concentración de PM2.5, se trabajó únicamente con la variable numérica continua.
+
+```{r}
+# Convert 'City' and 'AQI_Bucket' to factor variables
+aire$City <- as.factor(aire$City)
+aire$AQI_Bucket <- as.factor(aire$AQI_Bucket)
+
+# Convert 'Date' to a date variable, specifying the format
+aire$Date <- as.Date(aire$Date, format = "%d/%m/%Y")
+
+summary(aire)
+
+str(aire)
+```
+
+## Evaluación de base de datos
+```{r}
+# Group by Date and count the number of entries
+daily_counts <- aire %>%
+  group_by(Date) %>%
+  summarise(count = n())
+
+# Filter for dates with more than one entry
+dates_with_duplicates <- daily_counts %>%
+  filter(count > 1)
+
+
+# Display the dates with duplicate entries
+if (nrow(dates_with_duplicates) > 0) {
+  cat("Días con mas de un valor de  PM2.5:\n")
+  print(dates_with_duplicates)
+} else {
+  cat("No hay días con mas de un valor de PM2.5\n")
+}
+```
+El conjunto inicial contiene 2,009 observaciones. Se identificaron 2 valores faltantes en la variable `PM2.5` y 10 en `AQI_Bucket`. Dado que el AQI no se utilizará en el modelado, se centró la atención en imputar los valores ausentes de PM2.5. Se aplicó interpolación lineal mediante la función `na.approx()` del paquete `zoo`, asumiendo que la evolución de la contaminación en el corto plazo no es drástica.
+
+```{r}
+aire[!complete.cases(aire), ]
+# Usar interpolación lineal para rellenar valores faltantes en 'PM2.5'
+# Podemos usar la función na.approx del paquete zoo para la interpolación lineal.
+aire$`PM2.5` <- na.approx(aire$`PM2.5`)
+
+# Verificar que no haya más valores faltantes en 'PM2.5'
+missing_pm25_after_imputation <- sum(is.na(aire$`PM2.5`))
+cat("Número de datos faltantes en 'PM2.5' después de la imputación:", missing_pm25_after_imputation, "\n")
+```
+Las estadísticas resumen de la serie de PM2.5 revelan una distribución altamente asimétrica hacia la derecha, con una media de 117.10 µg/m³, una mediana de 94.49 µg/m³ y un máximo extremo de 685.36 µg/m³.
+
+```{r}
+# Estadísticas descriptivas
+summary_stats <- aire %>%
+  summarise(
+    Media = mean(PM2.5, na.rm = TRUE),
+    Mediana = median(PM2.5, na.rm = TRUE),
+    Desv_Est = sd(PM2.5, na.rm = TRUE),
+    Min = min(PM2.5, na.rm = TRUE),
+    Max = max(PM2.5, na.rm = TRUE)
+  )
+
+kable(summary_stats, digits = 3, caption = "Estadísticas descriptivas de PM2.5 ")
+```
+
+La gráfica de la serie de tiempo muestra una variabilidad, con estacionalidad clara (patrones repetidos, que parecieran ser anuales). Aunque no se observa una tendencia, la varianza no es constante puesto que los picos son más pronunciados en ciertos períodos del año, lo que sugiere heterocedasticidad.
+
+```{r}
+# Creación de la serie
+start_date <- min(aire$Date)
+end_date <- max(aire$Date)
+PM2.5 <- ts(aire$`PM2.5`, start = c(year(start_date), month(start_date), day(start_date)), end = c(year(end_date), month(end_date), day(end_date)), frequency = 365)
+
+# Gráfica
+ts.plot(PM2.5, col = "darkcyan", lwd = 2,
+        ylab = "PM2.5 promedio diario", xlab = "Tiempo",
+        main = "Serie de tiempo de PM2.5 (diaria)")
+
+```
+```{r}
+par(mfrow=c(1,2))
+acf(PM2.5,lag.max = 800) # decaimiento lento indica que la serie no es estacionaria
+pacf(PM2.5,lag.max = 800)
+```
+Podemos ver picos altos en los lag 0,1 y 2 en el ACF, los cuales hacen referencia a la estacionalidad anual, es decir el lag 1 hace referencia al día 365 (1 año), el lag 2 al día 730 (2 años).
+
+Para evaluar formalmente la estacionariedad en media (la cual segun gráficos parece ser estacionaria), se usa la prueba de Dickey-Fuller (ADF). El estadístico resultante fue -4.7414 con un p-valor < 0.01, lo que permite rechazar la hipótesis nula de raíz unitaria. Por lo tanto, la serie se considera estacionaria.
+
+```{r}
+adf_result <- adf.test(PM2.5, alternative = "stationary")
+cat("Prueba ADF:\n Estadístico =", round(adf_result$statistic, 4),
+    ", p-valor =", adf_result$p.value, "\n")
+```
+Dada la heterocedasticidad, se evaluo una transformación para estabilizar la varianza. Se estimó el parámetro de Box-Cox, obteniéndo $\lambda$ $\approx$ 0.257, cercano a cero. Por lo cual se aplicó la transformación logarítmica.
+
+```{r}
+lambda <- BoxCox.lambda(PM2.5)
+lambda
+
+```
+
+Dada la heterocedasticidad, se evaluo una transformación para
+estabilizar la varianza. Se estimó el parámetro de Box-Cox, obteniéndo $\lambda$
+= 0.257 ( cercana a 0). Por lo cual se aplicó la transformación
+logarítmica.
+
+```{r}
+# Transformación logarítmica
+l.PM2.5 <- log(PM2.5)
+ts.plot(l.PM2.5, col = "darkblue",
+        ylab = "log(PM2.5 promedio diario)",
+        main = "Serie transformada logarítmicamente")
+
+```
+La serie transformada presenta una varianza más homogénea y mantiene la estacionariedad en media (prueba ADF con p-valor $\approx$ 0.027), cumpliendo así los supuestos de estacionariedad para el ajuste de modelos ARIMA.
+
+```{r}
+adf.test(l.PM2.5,alternative = "stationary")
+```
+
+Luego de aplicar la transformación logarítmica a la serie de PM2.5, el test de Dickey–Fuller Aumentado (ADF) arrojó un estadístico de -3.65 con un p-valor de 0.027, lo que indicaría estacionariedad a un nivel de significancia del 5%.
+Sin embargo, la inspección de la función de autocorrelación (ACF) revela un decaimiento lento, señal de persistencia temporal y posible estacionalidad anual.
+Por tanto, la serie log-transformada aún no puede considerarse estrictamente estacionaria, y se recomienda aplicar una diferenciación regular (d = 1)
+
+```{r}
+par(mfrow=c(1,2))
+acf(l.PM2.5,lag.max = 800) # decaimiento lento indica que la serie no es estacionaria
+pacf(l.PM2.5,lag.max = 800)
+```
+
+
+```{r}
+auto.arima(l.PM2.5, seasonal = TRUE, D = 1, period = 365)
+
+```

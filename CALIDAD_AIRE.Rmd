@@ -13,7 +13,7 @@ rm(list=ls())
 
 
 # librerías
-```{r}
+```{r, show=F}
 #install.packages("readxl")
 #install.packages("knitr")
 #install.packages("forecast")
@@ -340,7 +340,9 @@ $$\nabla Z_{t}=\phi_1 \nabla Z_{t-1} + \phi_2 \nabla Z_{t-2} + a_t + \theta_1 a_
 $$ =0.216 \nabla Z_{t-1}+0.134 \nabla Z_{t-2}+a_{t}-0.428a_{t-1}-0.381a_{t-2} $$
 
 Para el modelo ARIMA(2,1,2) parece "reducirce" a un modelo ARIMA(1,1,2)
+
 # Validación modelos
+
 ## ARMA(2,2)
 ```{r}
 arma22_ar <- arma2.2$coef[grep("^ar", names(arma2.2$coef))]  # c(ar1, ar2)
@@ -383,7 +385,9 @@ ks.test(arma2.2$residuals, "pnorm", mean = 0, sd = sd(arma2.2$residuals))
 shapiro.test(arma2.2$residuals)
 ```
 Respecto a la normalidad, el p-valor fue menor al nivel de significancia por lo que se rechaza la hipotesis nula de que los residuales provienen de una distribución normal.
+
 ## ARIMA(2,1,2)
+
 ```{r}
 # Extraer coeficientes del modelo ARIMA(2,1,2)
 arima212_ar <- arima2.1.2$coef[grep("^ar", names(arima2.1.2$coef))]
@@ -396,7 +400,7 @@ pacf_empirica <- pacf(d.l.PM2.5, lag.max = 20, plot = FALSE)
 par(mfrow = c(1, 2))
 
 # ACF empírica vs teórica (sobre la serie diferenciada)
-acf(d.l.PM2.5, main = "ACF empírica de $\triangledown$log(PM2.5)")
+acf(d.l.PM2.5, main = expression("ACF empírica de " * Delta * "log(PM2.5)"))
 FinTS::plotArmaTrueacf(
   list(ar = arima212_ar, ma = arima212_ma),
   main = "ACF teórica del ARIMA(2,1,2)"
@@ -404,7 +408,7 @@ FinTS::plotArmaTrueacf(
 
 
 # PACF empírica vs teórica
-pacf(d.l.PM2.5, lag.max = 20, main = "PACF empírica de $\triangledown$log(PM2.5)", ylim = range(c(pacf_empirica$acf, -0.25, 0.25)) )
+pacf(d.l.PM2.5, lag.max = 20, main = expression("ACF empírica de " * Delta * "log(PM2.5)"), ylim = range(c(pacf_empirica$acf, -0.25, 0.25)) )
 
 FinTS::plotArmaTrueacf(
   list(ar = arima212_ar, ma = arima212_ma),
