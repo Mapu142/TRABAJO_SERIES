@@ -4,17 +4,20 @@ author:
   - María Paula Camargo Rincón
   - Laura Katherin Martinez Castiblanco
   - Yudy Vanessa Puerres Rosero
-date: "2025-11-15"
+date: "2025-11-21"
 output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: sentence
 ---
 
 ```{r}
 rm(list=ls())
 ```
 
-
 # librerías
-```{r, show=F}
+
+```{r message=FALSE, warning=FALSE, show=F}
 #install.packages("readxl")
 #install.packages("knitr")
 #install.packages("forecast")
@@ -40,23 +43,28 @@ library(nortest) # para prueba kolmogorov
 
 ## Base de datos
 
-La base de datos utilizada proviene del conjunto de datos público disponible en la plataforma Kaggle ([Rohan Rao, 2020 ](https://www.kaggle.com/datasets/rohanrao/air-quality-data-in-india)). Este conjunto fue recopilado originalmente por el Central Pollution Control Board (CPCB**)**, organismo oficial del Gobierno de la India encargado del monitoreo ambiental.
+La base de datos utilizada proviene del conjunto de datos público disponible en la plataforma Kaggle ([Rohan Rao, 2020](https://www.kaggle.com/datasets/rohanrao/air-quality-data-in-india)).
+Este conjunto fue recopilado originalmente por el Central Pollution Control Board (CPCB**)**, organismo oficial del Gobierno de la India encargado del monitoreo ambiental.
 
-Para este estudio, se utilizó la versión diaria del conjunto de datos, enfocándose exclusivamente en la variable PM2.5 (µg/m³) (partículas en suspensión con diámetro aerodinámico $\leq$ 2.5 µm) registrada en la ciudad de Delhi. La serie abarca el período comprendido entre el 1 de enero de 2015 y el 6 de diciembre de 2020, con observaciones diarias.
-```{r}
+Para este estudio, se utilizó la versión diaria del conjunto de datos, enfocándose exclusivamente en la variable PM2.5 (µg/m³) (partículas en suspensión con diámetro aerodinámico $\leq$ 2.5 µm) registrada en la ciudad de Delhi.
+La serie abarca el período comprendido entre el 1 de enero de 2015 y el 6 de diciembre de 2020, con observaciones diarias.
+
+```{r paged.print=TRUE}
 aire <- read_excel("Datos_India.xlsx")
 knitr::kable(head(aire,10),
              caption = "Primeros 10 datos",
              digits = 4)  # redondea a 4 decimales
 ```
-Además de PM2.5, el conjunto incluye el Índice de Calidad del Aire (AQI) y su clasificación categórica (*AQI_Bucket*), que divide la calidad del aire en seis niveles: *Good*, *Satisfactory*, *Moderate*, *Poor*, *Very Poor* y *Severe*. Sin embargo, dado que el objetivo del análisis es modelar la dinámica temporal de la concentración de PM2.5, se trabajó únicamente con la variable numérica continua.
 
-```{r}
-# Convert 'City' and 'AQI_Bucket' to factor variables
+Además de PM2.5, el conjunto incluye el Índice de Calidad del Aire (AQI) y su clasificación categórica (*AQI_Bucket*), que divide la calidad del aire en seis niveles: *Good*, *Satisfactory*, *Moderate*, *Poor*, *Very Poor* y *Severe*.
+Sin embargo, dado que el objetivo del análisis es modelar la dinámica temporal de la concentración de PM2.5, se trabajó únicamente con la variable numérica continua.
+
+```{r warning=FALSE, paged.print=TRUE}
+# Convertir 'City' y 'AQI_Bucket' a variables de tipo factor
 aire$City <- as.factor(aire$City)
 aire$AQI_Bucket <- as.factor(aire$AQI_Bucket)
 
-# Convert 'Date' to a date variable, specifying the format
+# Convertir 'Date' a una variable de fecha, especificando el formato
 aire$Date <- as.Date(aire$Date, format = "%d/%m/%Y")
 
 summary(aire)
@@ -65,28 +73,34 @@ str(aire)
 ```
 
 ## Evaluación de base de datos
+
 ```{r}
-# Group by Date and count the number of entries
+# Agrupar por fecha y contar el número de registros
 daily_counts <- aire %>%
   group_by(Date) %>%
   summarise(count = n())
 
-# Filter for dates with more than one entry
+# Filtrar las fechas que tienen más de un registro
 dates_with_duplicates <- daily_counts %>%
   filter(count > 1)
 
-
-# Display the dates with duplicate entries
+# Mostrar las fechas con registros duplicados
 if (nrow(dates_with_duplicates) > 0) {
-  cat("Días con mas de un valor de  PM2.5:\n")
+  cat("Días con más de un valor de PM2.5:\n")
   print(dates_with_duplicates)
 } else {
-  cat("No hay días con mas de un valor de PM2.5\n")
+  cat("No hay días con más de un valor de PM2.5\n")
 }
+# eliminar daily_counts para liberar memoria
+rm(daily_counts)
 ```
-El conjunto inicial contiene 2,009 observaciones. Se identificaron 2 valores faltantes en la variable `PM2.5` y 10 en `AQI_Bucket`. Dado que el AQI no se utilizará en el modelado, se centró la atención en imputar los valores ausentes de PM2.5. Se aplicó interpolación lineal mediante la función `na.approx()` del paquete `zoo`, asumiendo que la evolución de la contaminación en el corto plazo no es drástica.
 
-```{r}
+El conjunto inicial contiene 2,009 observaciones.
+Se identificaron 2 valores faltantes en la variable `PM2.5` y 10 en `AQI_Bucket`.
+Dado que el AQI no se utilizará en el modelado, se centró la atención en imputar los valores ausentes de PM2.5.
+Se aplicó interpolación lineal mediante la función `na.approx()` del paquete `zoo`, asumiendo que la evolución de la contaminación en el corto plazo no es drástica.
+
+```{r paged.print=TRUE}
 aire[!complete.cases(aire), ]
 # Usar interpolación lineal para rellenar valores faltantes en 'PM2.5'
 # Podemos usar la función na.approx del paquete zoo para la interpolación lineal.
@@ -96,9 +110,10 @@ aire$`PM2.5` <- na.approx(aire$`PM2.5`)
 missing_pm25_after_imputation <- sum(is.na(aire$`PM2.5`))
 cat("Número de datos faltantes en 'PM2.5' después de la imputación:", missing_pm25_after_imputation, "\n")
 ```
-Las estadísticas resumen de la serie de PM2.5 revelan una distribución altamente asimétrica hacia la derecha, con una media de 117.10 µg/m³, una mediana de 94.49 µg/m³ y un máximo extremo de 685.36 µg/m³.
 
-```{r}
+Las estadísticas resumen de la serie de PM2.5 revelan una distribución altamente asimétrica hacia la derecha, con una media de 117.104 µg/m³, una mediana de 94.49 µg/m³ y un máximo extremo de 685.36 µg/m³.
+
+```{r paged.print=TRUE}
 # Estadísticas descriptivas
 summary_stats <- aire %>%
   summarise(
@@ -112,57 +127,80 @@ summary_stats <- aire %>%
 kable(summary_stats, digits = 3, caption = "Estadísticas descriptivas de PM2.5 ")
 ```
 
-#**Identificación de modelos**
+# Identificación de modelos
 
-La gráfica de la serie de tiempo muestra una variabilidad, con estacionalidad clara (patrones repetidos, que parecieran ser anuales). Aunque no se observa una tendencia, la varianza no es constante puesto que los picos son más pronunciados en ciertos períodos del año, lo que sugiere heterocedasticidad.
+La gráfica de la serie de tiempo muestra una variabilidad, con estacionalidad clara (patrones repetidos, que parecieran ser anuales).
+Aunque no se observa una tendencia, la varianza no es constante puesto que los picos son más pronunciados en ciertos períodos del año, lo que sugiere heterocedasticidad.
 
-```{r}
-# Creación de la serie
+```{r fig.height=4, fig.width=10}
+# Creación de la serie temporal
 start_date <- min(aire$Date)
 end_date <- max(aire$Date)
-PM2.5 <- ts(aire$`PM2.5`, start = c(year(start_date), month(start_date), day(start_date)), end = c(year(end_date), month(end_date), day(end_date)), frequency = 365)
+PM2.5 <- ts(aire$`PM2.5`, 
+            start = c(year(start_date), month(start_date), day(start_date)), 
+            end = c(year(end_date), month(end_date), day(end_date)), 
+            frequency = 365)
+PM2.5_zoom <- window(PM2.5, start = c(2016, 1), end = c(2018, 1))
 
-# Gráfica
-ts.plot(PM2.5, col = "darkcyan", lwd = 2,
+# Configurar dos gráficos en una fila
+par(mfrow = c(1, 2))
+
+# Gráfico completo
+ts.plot(PM2.5, col = "darkcyan", lwd = 1.5,
         ylab = "PM2.5 promedio diario", xlab = "Tiempo",
-        main = "Serie de tiempo de PM2.5 (diaria)")
+        main = "Serie completa")
+# Gráfico con zoom
+ts.plot(PM2.5_zoom, col = "darkcyan", lwd = 1.5,
+        ylab = "PM2.5 promedio diario", xlab = "Tiempo",
+        main = "Zoom: 2016-2017")
 
 ```
-```{r}
-par(mfrow=c(1,2))
-acf(PM2.5,lag.max = 800) # decaimiento lento indica que la serie no es estacionaria
-pacf(PM2.5,lag.max = 800)
+
+```{r fig.height=6.5, fig.width=10}
+# Configurar panel 1x2: izquierda = serie completa, derecha = zoom
+par(mfrow = c(2, 2))
+
+## Panel izquierdo: Serie completa
+acf(PM2.5, lag.max = 800, main = "ACF - 2 años", col = "darkcyan", lwd = 1) # 800 > 2*365 → muestra más de 2 años
+pacf(PM2.5, lag.max = 800, main = "PACF - 2 años", col = "darkcyan", lwd = 1)
+## Panel derecho: Serie con zoom (subconjunto)
+acf(PM2.5, lag.max = 200, main = "ACF - Zoom (1er año)", col = "darkcyan", lwd = 1)   # ajusta lag.max al tamaño del subconjunto
+pacf(PM2.5, lag.max = 50, main = "PACF - Zoom (1/4 de año)", col = "darkcyan", lwd = 1.25)
 ```
-Podemos ver picos altos en los lag 0,1 y 2 en el ACF, los cuales son decrecientes y hacen referencia a la estacionalidad anual, es decir el lag 1 hace referencia al día 365 (1 año), el lag 2 al día 730 (2 años).
 
-Para evaluar formalmente la estacionariedad en media (la cual segun gráficos parece ser estacionaria), se usa la prueba de Dickey-Fuller (ADF). El estadístico resultante fue -4.7414 con un p-valor < 0.01, lo que permite rechazar la hipótesis nula de raíz unitaria. Por lo tanto, la serie se considera estacionaria.
+Podemos ver picos altos en los lag $0$, $1$ y $2$ en el ACF, los cuales son decrecientes y hacen referencia a la estacionalidad anual, es decir el lag 1 hace referencia al día 365 (1 año), el lag 2 al día 730 (2 años).
+
+Para evaluar formalmente la estacionariedad en media (la cual segun gráficos parece ser estacionaria), se usa la prueba de Dickey-Fuller (ADF).
+El estadístico resultante fue -4.7414 con un p-valor \< 0.01, lo que permite rechazar la hipótesis nula de raíz unitaria.
+Por lo tanto, la serie se considera estacionaria.
 
 ```{r}
-adf_result <- adf.test(PM2.5, alternative = "stationary")
-cat("Prueba ADF:\n Estadístico =", round(adf_result$statistic, 4),
-    ", p-valor =", adf_result$p.value, "\n")
+adf.test(PM2.5, alternative = "stationary")
 ```
-Dada la heterocedasticidad, se evaluo una transformación para estabilizar la varianza. Se estimó el parámetro de Box-Cox, obteniéndo $\lambda$ $\approx$ 0.257, cercano a cero. Por lo cual se aplicó la transformación logarítmica.
 
-```{r}
+Al aplicar la descomposición STL (Seasonal-Trend-Loess) se confirma visualmente lo encontrado anteriormente; El componente estacional exhibe un patrón anual repetitivo, con picos consistentes a finales de año.
+Al evaluar la tendencia de la serie, se evidencia como aumentan la cantidad de PM2.5, la cual se reduce considerablemente en lo que parese el periodo de pandemia.
+
+```{r fig.height=6.5, fig.width=10}
+# Descomposición STL
+plot(stl(PM2.5, s.window = "periodic"), col = "darkcyan", lwd = 1.25)
+```
+
+Dada la heterocedasticidad, se evaluo una transformación para estabilizar la varianza.
+Se estimó el parámetro de Box-Cox, obteniéndo $\lambda$ $\approx$ 0.257, cercano a cero.
+Por lo cual se aplicó la transformación logarítmica.
+
+```{r fig.height=4, fig.width=10}
 lambda <- BoxCox.lambda(PM2.5)
 lambda
 
-```
-
-Dada la heterocedasticidad, se evaluo una transformación para
-estabilizar la varianza. Se estimó el parámetro de Box-Cox, obteniéndo $\lambda$
-= 0.257 ( cercana a 0). Por lo cual se aplicó la transformación
-logarítmica.
-
-```{r}
 # Transformación logarítmica
 l.PM2.5 <- log(PM2.5)
-ts.plot(l.PM2.5, col = "darkblue",
+ts.plot(l.PM2.5, col = "darkcyan", lwd = 1.25,
         ylab = "log(PM2.5 promedio diario)",
         main = "Serie transformada logarítmicamente")
-
 ```
+
 La serie transformada presenta una varianza más homogénea y mantiene la estacionariedad en media (prueba ADF con p-valor $\approx$ 0.027), sin embargo, a su vez mantiene la estacionalidad anual.
 
 ```{r}
@@ -171,87 +209,137 @@ adf.test(l.PM2.5,alternative = "stationary")
 
 Luego de aplicar la transformación logarítmica a la serie de PM2.5, el test de Dickey–Fuller Aumentado (ADF) arrojó un estadístico de -3.65 con un p-valor de 0.027, lo que indicaría estacionariedad a un nivel de significancia del 5%.
 Sin embargo, la inspección de la función de autocorrelación (ACF) revela un decaimiento lento, señal de persistencia temporal y posible estacionalidad anual.
-Por tanto, la serie log-transformada aún no puede considerarse estrictamente estacionaria, y se recomienda aplicar una diferenciación regular (d = 1)
 
-```{r}
-par(mfrow=c(1,2))
-acf(l.PM2.5,lag.max = 800) # decaimiento lento indica que la serie no es estacionaria
-pacf(l.PM2.5,lag.max = 800)
-```
-Nuevamente encontramos picos en los lag's referentes a los años, picos decrecientes, por lo tanto a esta serie logarítmica se le aplicará una diferenciación estacional (D=1).
-```{r}
-d.l.PM2.5 <- diff(l.PM2.5,differences = 1) # Retorno de PM2.5
-ts.plot(d.l.PM2.5, col = "darkcyan", lwd = 1.25,
-        ylab = " difflog(PM2.5 promedio diario)", xlab = "Tiempo",
-        main = "Serie con diff de la transformación logaritmo")
-adf.test(d.l.PM2.5)
-par(mfrow=c(1,2))
-acf(d.l.PM2.5,lag.max = 800)
-pacf(d.l.PM2.5,lag.max = 800)
+A su vez se observa en la descomposición STL que la estructura estacional anual persiste con patrones cíclicos bien definidos cada año.
+Ademas al evaluar los residuales reflejan un comportamiento aleatorio, luego la transformación permite capturar adecuadamente la serie.
 
+```{r fig.height=6.5, fig.width=10}
+# Descomposición STL 
+plot(stl(l.PM2.5, s.window = "periodic"), col = "darkcyan", lwd = 1.25)
 ```
-Luego de aplicar la transformación logarítmica, se realizó una diferenciación de primer orden $(1-B)Z_{t}$ con el fin de eliminar la tendencia presente en la serie.
+
+Dada la estacionalidad persistente de la serie log-transformada aún no puede considerarse estrictamente estacionaria (decaimiento lento del ACF), y se considera aplicar una diferenciación regular (d = 1) o incluir una componente estacional al modelo.
+
+```{r fig.height=4, fig.width=10}
+par(mfrow = c(1, 2))
+
+acf(l.PM2.5, lag.max = 1000, main = "ACF ", col = "darkcyan", lwd = 1)  # decaimiento lento indica que la serie no es estacionaria
+pacf(l.PM2.5, lag.max = 50, main = "PACF - Zoom (1/4 de año)", col = "darkcyan", lwd = 1.25)
+```
+
+Por lo tanto, se plantea un primer modelo con una diferenciación de primer orden $(1-B)Z_{t}$ con el fin de eliminar la tendencia presente en la serie.
 La inspección de la serie transformada muestra oscilaciones alrededor de una media constante, sin tendencias visibles.
 
-```{r}
+```{r fig.height=6.5, fig.width=10, paged.print=TRUE}
+d.l.PM2.5 <- diff(l.PM2.5,differences = 1) # Retorno de PM2.5
+
+plot(stl(d.l.PM2.5, s.window = "periodic"), col = "darkcyan", lwd = 1.25)
+# ts.plot(d.l.PM2.5, col = "darkcyan", lwd = 1.25,
+#         ylab = " difflog(PM2.5 promedio diario)", xlab = "Tiempo",
+#         main = "Serie con diff de la transformación logaritmo")
+```
+
+La descomposición STL revela que el componente “data” ya no presenta tendencia visible, con oscilaciones centradas alrededor de cero, mientras que el componente “seasonal” mantiene su estructura anual, aunque con amplitud reducida, lo que sugiere que la diferenciación eliminó la tendencia sin afectar significativamente la estacionalidad subyacente.
+
+Asimismo, la función de autocorrelación (ACF) decae rápidamente tras el primer rezago, indicando ausencia de dependencia de largo plazo, mientras que la PACF muestra un patrón más localizado, lo cual es consistente con la presencia de estacionalidad.
+
+```{r fig.height=4, fig.width=10, paged.print=TRUE}
+par(mfrow=c(1,2))
+acf(d.l.PM2.5,lag.max = 100, col = "darkcyan", lwd = 1.25)
+pacf(d.l.PM2.5,lag.max = 100, col = "darkcyan", lwd = 1.25)
+
+```
+
+El test de Dickey–Fuller Aumentado (ADF) arrojó un estadístico de -16.31 con un p-valor \< 0.01, indicando que la serie diferenciada efectivamente es estacionaria.
+
+```{r fig.height=6.5, fig.width=10}
 adf.test(d.l.PM2.5,alternative = "stationary")
 ```
 
-El test de Dickey–Fuller Aumentado (ADF) arrojó un estadístico de -16.31 con un p-valor < 0.01, indicando que la serie diferenciada es estacionaria.
-Asimismo, la función de autocorrelación (ACF) se corta rápidamente tras el primer rezago, confirmando la ausencia de dependencia de largo plazo.
+En conjunto, estos resultados validan que la serie transformada y diferenciada cumple con los supuestos de estacionariedad requeridos para la identificación y ajuste de modelos lineales de series temporales.
 
-Asimismo, la función de autocorrelación (ACF) se corta rápidamente tras el primer rezago, confirmando la ausencia de dependencia de largo plazo.
-En consecuencia, la serie transformada y diferenciada cumple los supuestos de estacionariedad necesarios para proceder con la identificación de un modelo SARIMA.
+Por otro lado se quiere comparar con un modelo que tenga en cuenta la estacionalidad y se evalua el modelo diferenciado con respecto a la estacionalidad de la serie con tranformación $\log$, es decir se tiene la siguiente serie $(1-B^{365})Z_{t}$.
 
-Por otro lado se quiere comparar con un modelo en donde se diferencia de acuerdo a la estacionalidad
+Esta serie presenta en su descomposición STL oscilaciones alrededor de cero, sin tendencia aparente en "data", mientras que el componente “seasonal” es notablemente atenuado, indicando que la diferenciación estacional ha eliminado eficazmente el patrón anual subyacente.
+El componente de “trend”, aunque suave, muestra una ligera declinación en los últimos años, sugiriendo una posible mejora relativa en los niveles promedio de contaminación tras la remoción de la estacionalidad.
 
-```{r}
+```{r fig.height=6.5, fig.width=10}
 ds.l.PM2.5 <- diff(l.PM2.5,lag = 365) # Retorno de PM2.5
-ts.plot(ds.l.PM2.5, col = "darkcyan", lwd = 1.25,
-        ylab = " diff(log(PM2.5 promedio diario)", xlab = "Tiempo",
-        main = "Serie con diff de la transformación logaritmo")
-adf.test(ds.l.PM2.5)
-par(mfrow=c(1,2))
-acf(ds.l.PM2.5,lag.max = 800)
-pacf(ds.l.PM2.5,lag.max = 800)
 
+plot(stl(ds.l.PM2.5, s.window = "periodic"), col = "darkcyan", lwd = 1.25)
+# ts.plot(ds.l.PM2.5, col = "darkcyan", lwd = 1.25,
+#         ylab = " diff(log(PM2.5 promedio diario)", xlab = "Tiempo",
+#         main = "Serie con diff de la transformación logaritmo")
 ```
 
+Por otro lado, la prueba de Dickey-Fuller Aumentada arrojó un estadístico de -9.0883 (p-valor \< 0.01), lo que permite rechazar con gran certeza la hipótesis nula de raíz unitaria, confirmando la estacionariedad de la serie diferenciada.
 
 ```{r}
 adf.test(ds.l.PM2.5,alternative = "stationary")
 ```
-El test de Dickey–Fuller Aumentado (ADF) arrojó un estadístico de -9.0883 con un p-valor< 0.01, indicando que la serie diferenciada es estacionaria.
-Analizando la función de autocorrelación (ACF) presenta rezagos al inicio y en el lag de la anualidad, lo mismo para el PACF.
 
-#**Estimación del modelo**
-En consecuencia se estimara un modelo $ARMA(2,2)$ y un $SARIMA(2,0,2)x(0,1,0)_{365}$.
+Asimismo, la función de autocorrelación (ACF) presenta rezagos significativos en los primeros valores y en múltiplos de 365, lo cual refleja la persistencia de cierta estructura residual estacional, mientras que la PACF decrece rápidamente, sugiriendo que un modelo SARIMA con componentes autorregresivos y de media móvil podría ser adecuado para capturar la dinámica restante.
+
+```{r fig.height=4, fig.width=10}
+par(mfrow=c(1,2))
+acf(ds.l.PM2.5,lag.max = 800, col = "darkcyan", lwd = 1)
+pacf(ds.l.PM2.5,lag.max = 800, col = "darkcyan", lwd = 1)
+```
+
+En conjunto, estos resultados validan que la serie transformada y diferenciada estacionalmente cumple con los supuestos de estacionariedad requeridos para la identificación y ajuste de modelos ARIMA y SARIMA.
+
+# Estimación del modelo
+
+Se procedió a ajustar dos modelos candidatos: un modelo $ARMA(2,2)$ y un $SARIMA(2,0,2)\times (0,1,0)_{365}$ .Sin embargo, dadas las limitaciones computacionales asociadas con la especificación $SARIMA(2,0,2) \times (0,1,0)_{365}$, especialmente por la alta dimensionalidad del operador estacional (periodo = $365$), se optó por emplear la función `auto.arima()` con restricciones que mantuvieran la estructura no estacional dentro del rango propuesto (hasta orden 2 en $AR$ y $MA$) y fijaran el componente estacional a $(0,1,0)$.
+Adicionalmente, mas adelante se cmprueba que estos dos modelos SARIMA se comportan de similar manera, luego es preferible trabajar con el modelo de menor costo computacional.
 
 ```{r}
-arma2.2 <- arima(x = l.PM2.5,order = c(2,0,2))
+arma2.2 <- arima(x = l.PM2.5, order = c(2,0,2))
+arma2.2
+#muy pesado computacionalmente
 sarima2.0.2x0.1.0 <- Arima(
   l.PM2.5,
   order = c(2,0,2),
-  seasonal = list(order = c(0,1,0), period = 365))
+  seasonal = list(order = c(0,1,0), period = 365),
+  optim.control = list(maxit = 5)  # límite de iteraciones
+  )
+
+#SARIMA con auto.arima optimizado (más inteligente)
+sarima_auto <- auto.arima(
+  l.PM2.5,
+  d = 0,              # Ya aplicamos transformación
+  D = 1,              # Diferenciación estacional
+  max.p = 2, max.q = 2,
+  max.P = 0, max.Q = 0,
+  seasonal = TRUE,
+  stepwise = TRUE,    # para velocidad
+  approximation = TRUE, # para series largas
+  trace = TRUE        # Para monitorear progreso
+)
+sarima_auto
 ```
 
-```{r}
+En cuanto al modelo $ARMA(2,2)$, este logró un ajuste más preciso en la muestra de entrenamiento, evidenciado por métricas de error inferiores en comparación con el modelo SARIMA estimado.
+Sin embargo hay que considerar que aunque pareciera predecir mejor el modelo ARIMA, muy seguramente serría para pronosticos cercanos y no a largo plazo, pues no concidera la estacionariedad.
+
+```{r paged.print=TRUE}
 # Obtener métricas de error en la muestra de entrenamiento
 acc_arma2.2    <- accuracy(arma2.2)
 acc_sarima2.0.2x0.1.0 <- accuracy(sarima2.0.2x0.1.0)
-
-
+acc_sarima_auto <- accuracy(sarima_auto)
 # Crear tabla comparativa
 comparacion <- data.frame(
-  Modelo = c("ARMA(2,2)", "SARIMA(2,0,2)(0,1,0)[365]"),
+  Modelo = c("ARMA(2,2)", "SARIMA(1,0,2)(0,1,0)[365]", "SARIMA(2,0,2)(0,1,0)[365]"),
   RMSE = c(acc_arma2.2[1, "RMSE"],
+           acc_sarima_auto[1, "RMSE"],
            acc_sarima2.0.2x0.1.0[1, "RMSE"]),
   MAE  = c(acc_arma2.2[1, "MAE"],
+           acc_sarima_auto[1, "MAE"],
            acc_sarima2.0.2x0.1.0[1, "MAE"]),
   MAPE = c(acc_arma2.2[1, "MAPE"],
+           acc_sarima_auto[1, "MAPE"],
            acc_sarima2.0.2x0.1.0[1, "MAPE"])
 )
-
 
 # Mostrar tabla
 knitr::kable(comparacion,
@@ -260,89 +348,238 @@ knitr::kable(comparacion,
              row.names = FALSE)
 
 ```
-Parece que el modelo ARMA(2,2) obtuvo un mejor RMSE, mientras que en el resto de las métricas obtuvieron resultados casi similares.
+
+## Fórmulas estimadas de los modelos
+
+```{r paged.print=TRUE}
+# Extraer coeficientes y sus errores estándar
+extraer_coeficientes <- function(modelo, nombre) {
+  coefs <- coef(modelo)
+  se <- sqrt(diag(modelo$var.coef))
+  out <- data.frame(
+    Modelo = nombre,
+    Coeficiente = names(coefs),
+    Estimado = round(coefs, 4),
+    Error = round(se[match(names(coefs), names(se))], 4),
+    stringsAsFactors = FALSE
+  )
+  return(out)
+}
+
+# Crear tabla combinada
+tabla_coef <- rbind(
+  extraer_coeficientes(arma2.2, "ARMA(2,2)"),
+  extraer_coeficientes(sarima_auto, "SARIMA(1,0,2)(0,1,0)[365]")
+)
+
+# Mostrar en formato bonito
+knitr::kable(tabla_coef, 
+             caption = "Coeficientes estimados de los modelos",
+             col.names = c("Modelo", "Parámetro", "Estimación", "Error estándar"),
+             digits = 4,
+             booktabs = TRUE)
+```
+
+### Modelo $ARMA(2,2)$
+
+El modelo ARMA(2,2) ajustado a la serie transformada $\log(\text{PM2.5}_t)$ tiene la forma:
+
+$$
+\log(\text{PM2.5}_t) = 4.5934 + 1.3806 \cdot \log(\text{PM2.5}_{t-1}) - 0.3876 \cdot \log(\text{PM2.5}_{t-2}) + a_t - 0.5955 \cdot a_{t-1} - 0.2087 \cdot a_{t-2}
+$$
+
+donde $a_t$ es el término de error (ruido blanco).
+
+### Modelo $SARIMA(1,0,2) \times (0,1,0)_{365}$
+
+El modelo $SARIMA(1,0,2) \times (0,1,0)_{365}$ ajustado a la misma serie transformada se expresa como:
+
+$$
+(1 - B^{365}) \log(\text{PM2.5}_t) = -0.0001 \cdot t + 0.6698 \cdot (1 - B^{365}) \log(\text{PM2.5}_{t-1}) + A_t + 0.0670 \cdot a_{t-1} - 0.1365 \cdot a_{t-2}
+$$
+
+o, de forma equivalente en su representación no diferenciada:
+
+$$
+\log(\text{PM2.5}_t) = \log(\text{PM2.5}_{t-365}) - 0.0001 \cdot t + 0.6698 \cdot \left( \log(\text{PM2.5}_{t-1}) - \log(\text{PM2.5}_{t-366}) \right) + a_t + 0.0670 \cdot a_{t-1} - 0.1365 \cdot a_{t-2}
+$$
+
+# Validación de los modelos
+
+Para garantizar la validez de los modelos ajustados ($ARMA(2,2)$ y $SARIMA(1,0,2) \times (0,1,0)_{365}$) se procedió a evaluar si sus residuales cumplen con los supuestos teóricos de un proceso de ruido blanco: ausencia de autocorrelación, homocedasticidad y distribución aproximadamente normal.
+
+```{r fig.height=4.5, fig.width=10}
+# Función para validar residuales de un modelo
+check_whiteness <- function(modelo, model_name, period = 365) {
+  cat("=== Validación de residuales:", model_name, "===\n")
+  resid <- residuals(modelo)
+  # Histograma y Q-Q plot
+  par(mfrow = c(1, 2))
+  qqnorm(resid, main = paste("Q-Q Plot:", model_name))
+  qqline(resid, col = "darkcyan")
+  
+  # ACF y PACF de los residuales (hasta 800 rezagos para ver estacionalidad)
+  pacf(resid, lag.max = 800, main = paste("PACF de residuales:", model_name), col = "darkcyan")
+  
+  par(mfrow = c(1, 1))
+  checkresiduals(modelo, col = "darkcyan")
+  # Prueba de Ljung-Box: rezagos clave
+  # Rezago 20: dependencia general
+  lb20 <- Box.test(resid, lag = 20, type = "Ljung-Box")
+  # Rezago 365: dependencia estacional anual
+  lb365 <- Box.test(resid, lag = 365, type = "Ljung-Box")
+  # Rezago 730: dependencia estacional a 2 años
+  lb730 <- Box.test(resid, lag = 730, type = "Ljung-Box")
+  
+  cat("Prueba Ljung-Box (lag=20):  p-valor =", round(lb20$p.value, 4), "\n")
+  cat("Prueba Ljung-Box (lag=365): p-valor =", round(lb365$p.value, 4), "\n")
+  cat("Prueba Ljung-Box (lag=730): p-valor =", round(lb730$p.value, 4), "\n")
+  
+  if (lb365$p.value > 0.05) {
+    cat("→ No hay evidencia de autocorrelación estacional en los residuales (lag=365).\n")
+  } else {
+    cat("→ ¡Advertencia! Posible autocorrelación estacional en residuales (lag=365).\n")
+  }
+}
+```
+
+## Modelo $ARMA(2,2)$
+
+Al evaluar los residuales no se encuentran patrones evidentes ni cambios en la varianza.
+El histograma muestra una distribución simétrica y centrada en cero, mientras que el gráfico Q-Q confirma una buena aproximación a la normalidad, especialmente en las colas intermedias.
+
+La función de autocorrelación parcial (PACF) de los residuales no presenta picos significativos en los primeros rezagos, lo cual sugiere ausencia de dependencia temporal local.
+Además, la prueba de Ljung-Box aplicada en múltiplos del período estacional (lag = 365 y lag = 730) arroja p-valores superiores a 0.05 (p = 0.1211 y p = 0.0201, respectivamente), lo que indica ausencia de autocorrelación estacional significativa en los residuales. 
+
+```{r fig.height=4, fig.width=10, paged.print=FALSE}
+
+# Aplicar validación a ambos modelos
+check_whiteness(arma2.2, "ARMA(2,2)")
+```
+
+## Modelos SARIMA
+
+En este caso es mas evidente que ambos modelos son equivalentes en sus desempeños.
+Se tiene un Q-Q plot aceptable a excepción por la concentración en la media dada por la aparente autocorrelación.
+
+La prueba de Ljung-Box aplicada al rezago 365 arroja un p-valor nulo (p ≈ 0), lo que implica evidencia estadísticamente significativa de autocorrelación estacional en los residuales.
+Esto a pesar de incluir parte estacional en el modelo.
+
+```{r fig.height=4, fig.width=10}
+
+check_whiteness(sarima_auto, "SARIMA(1,0,2)(0,1,0)[365]")
+check_whiteness(sarima2.0.2x0.1.0, "SARIMA(2,0,2)(0,1,0)[365]")
+```
+
+# Selección del modelo
+
+Para la selección del mejor modelo se procede a evaluar la habilidad predictiva de cada modelo para un año, para evaluar cual capta de mejor manera el comportacmiento a futuro y en particular como predice la estacionalidad.
+
+```{r message=TRUE}
+# Definir conjunto de entrenamiento (excluyendo el último año)
+train_end <- length(l.PM2.5) - 365
+l.PM2.5_train <- window(l.PM2.5, end = time(l.PM2.5)[train_end])
+l.PM2.5_test <- window(l.PM2.5, start = time(l.PM2.5)[train_end + 1])
+
+cat("Período de entrenamiento:", start(l.PM2.5_train), "a", end(l.PM2.5_train), "\n")
+cat("Período de prueba:", start(l.PM2.5_test), "a", end(l.PM2.5_test), "\n")
+cat("Observaciones en prueba:", length(l.PM2.5_test), "\n")
+```
+
+## Modelo $ARMA(2,2)$
 
 ```{r}
-# Nombres de parámetros (8 filas)
-parametros <- c("Intercepto", "ar1", "ar2", "ma1", "ma2", "logLik", "AIC", "BIC")
+arma2.2_train <- arima(l.PM2.5_train, order = c(2,0,2))
+cat("ARMA(2,2) re-estimado - AIC:", arma2.2_train$aic, "\n")
 
-# --- Modelo ARMA(2,2) ---
-coef_arma <- coef(arma2.2)  # Tiene: ar1, ar2, ma1, ma2, intercept
-# Aseguramos el orden: intercept, ar1, ar2, ma1, ma2
-coef_arma_ordenado <- c(
-  coef_arma["intercept"],
-  coef_arma["ar1"],
-  coef_arma["ar2"],
-  coef_arma["ma1"],
-  coef_arma["ma2"]
-)
-t_arma_ordenado <- coef_arma_ordenado / c(
-  sqrt(arma2.2$var.coef["intercept", "intercept"]),
-  sqrt(arma2.2$var.coef["ar1", "ar1"]),
-  sqrt(arma2.2$var.coef["ar2", "ar2"]),
-  sqrt(arma2.2$var.coef["ma1", "ma1"]),
-  sqrt(arma2.2$var.coef["ma2", "ma2"])
-)
+```
 
-# --- Modelo ARIMA(2,1,2) ---
-# Este modelo NO tiene intercepto (porque d = 1), pero SÍ tiene ar1 y ar2
-coef_sarima <- coef(sarima2.0.2x0.1.0)  # Debe tener: ar1, ar2, ma1, ma2
-coef_sarima_ordenado <- c(
-  NA,  # Intercepto
-  coef_sarima["ar1"],
-  coef_sarima["ar2"],
-  coef_sarima["ma1"],
-  coef_sarima["ma2"]
-)
+```{r}
+# Pronóstico ARMA(2,2)
+forecast_arma <- forecast(arma2.2_train, h = 365)
+cat("Pronóstico ARMA(2,2) - generado\n")
+```
 
-# Valores t para ARIMA(2,1,2)
-t_sarima_ordenado <- c(
-  NA,
-  coef_sarima["ar1"] / sqrt(sarima2.0.2x0.1.0$var.coef["ar1", "ar1"]),
-  coef_sarima["ar2"] / sqrt(sarima2.0.2x0.1.0$var.coef["ar2", "ar2"]),
-  coef_sarima["ma1"] / sqrt(sarima2.0.2x0.1.0$var.coef["ma1", "ma1"]),
-  coef_sarima["ma2"] / sqrt(sarima2.0.2x0.1.0$var.coef["ma2", "ma2"])
-)
+```{r fig.height=5, fig.width=10}
 
-# --- Construir tabla ---
-resumen <- data.frame(
-  "Parámetro" = parametros,
+# Gráfico 1: ARMA vs Observado
+plot(forecast_arma, main = "Pronóstico ARMA(2,2) vs Observado - Último Año",
+     ylab = "log(PM2.5)", xlab = "Tiempo")
+lines(l.PM2.5_test, col = "red", lwd = 1.25)
+legend("topleft", legend = c("Pronóstico", "Intervalo 80%", "Intervalo 95%", "Observado"),
+       col = c("blue", "lightblue", "lightgray", "red"), lty = c(1, 1, 1, 1), lwd = c(2, 5, 5, 2), cex = 0.8)
+```
+
+## Modelo SARIMA
+
+```{r}
+sarima_auto_train <- auto.arima(
+  l.PM2.5_train,
+  d = 0,
+  D = 1,
+  max.p = 1, max.q = 2,
+  max.P = 0, max.Q = 0,
+  seasonal = TRUE,
+  stepwise = TRUE,
+  approximation = TRUE,
+  trace = FALSE
+)
+cat("SARIMA auto re-estimado - Especificación:", arimaorder(sarima_auto_train), "\n")
+cat("SARIMA auto re-estimado - AIC:", sarima_auto_train$aic, "\n")
+```
+
+```{r}
+# Pronóstico SARIMA auto
+forecast_sarima_auto <- forecast(sarima_auto_train, h = 365)
+cat("Pronóstico SARIMA auto - generado\n")
+```
+
+```{r fig.height=5, fig.width=10}
+# Gráfico 2: SARIMA Auto vs Observado
+plot(forecast_sarima_auto, main = "Pronóstico SARIMA Auto vs Observado - Último Año",
+     ylab = "log(PM2.5)", xlab = "Tiempo")
+lines(l.PM2.5_test, col = "red", lwd = 1.5)
+legend("topleft", legend = c("Pronóstico", "Intervalo 80%", "Intervalo 95%", "Observado"),
+       col = c("blue", "lightblue", "lightgray", "red"), lty = c(1, 1, 1, 1), lwd = c(2, 5, 5, 1), cex = 0.8)
+```
+
+## Comparación de modelos
+
+```{r}
+# Función para calcular métricas de error
+calculate_forecast_metrics <- function(forecast_obj, actual) {
+  pred <- as.numeric(forecast_obj$mean)
+  errors <- actual - pred
   
-  "ARMA(2,2)" = c(coef_arma_ordenado, arma2.2$loglik, arma2.2$aic, BIC(arma2.2)),
-  "t-valor ARMA(2,2)" = c(t_arma_ordenado, NA, NA, NA),
-  
-  "SARIMA(2,0,2)(0,1,0)[365]" = c(coef_sarima_ordenado, sarima2.0.2x0.1.0$loglik, sarima2.0.2x0.1.0$aic, BIC(sarima2.0.2x0.1.0)),
-  "t-valor SARIMA(2,0,2)(0,1,0)[365]" = c(t_sarima_ordenado, NA, NA, NA),
-  stringsAsFactors = FALSE
+  metrics <- c(
+    RMSE = sqrt(mean(errors^2, na.rm = TRUE)),
+    MAE = mean(abs(errors), na.rm = TRUE),
+    MAPE = mean(abs(errors/actual) * 100, na.rm = TRUE),
+    MASE = mean(abs(errors)) / mean(abs(diff(actual, lag = 365)), na.rm = TRUE)
+  )
+  return(metrics)
+}
+
+# Calcular métricas para cada modelo
+metrics_arma <- calculate_forecast_metrics(forecast_arma, l.PM2.5_test)
+metrics_sarima_auto <- calculate_forecast_metrics(forecast_sarima_auto, l.PM2.5_test)
+
+# Crear tabla comparativa
+forecast_comparison <- data.frame(
+  Modelo = c("ARMA(2,2)", "SARIMA Auto"),
+  RMSE = c(metrics_arma["RMSE"], metrics_sarima_auto["RMSE"]),
+  MAE = c(metrics_arma["MAE"], metrics_sarima_auto["MAE"]),
+  MAPE = c(metrics_arma["MAPE"], metrics_sarima_auto["MAPE"])
 )
 
+# Mostrar tabla comparativa
 knitr::kable(
-  resumen,
-  caption = "Tabla de resumen de los modelos ARMA(2,2) y ARIMA(2,1,2)",
-  digits = 3,
+  forecast_comparison,
+  caption = "Comparación de métricas de error en pronóstico out-of-sample (1 año)",
+  digits = 4,
   row.names = FALSE
 )
 ```
-Se destaca el hecho de que para el modelo ARMA(2,2) todos los parámetros son significativos, mientras que para el modelo SARIMA(2,0,2)(0,1,0)[365] solo $\phi_{1}$ y $\theta_2$ son significativos.
 
-Por otro lado todos los criterios parecen ser mejores en el modelo ARMA(2,2), que en el modelo SARIMA(2,0,2)(0,1,0)[365]
-
-Se presentan a continuación las formulas de los modelos con los
-coeficientes estimados de la serie transformada $\log(\text{PM}_{2.5})$,
-denotada como $Z_t$:.
-
--   *Formula ARMA(2,2)*
-
-$$
-Z_t = \mu + \phi_1 Z_{t-1} + \phi_2 Z_{t-2} + a_t + \theta_1 a_{t-1} + \theta_2 a_{t-2} 
-$$
-
-$$ = 4.593 + 1.38 Z_{t-1} -0.388 Z_{t-2} + a_t + \theta_1 a_{t-1} + \theta_2 a_{t-2}$$
--   *Formula SARIMA(2,0,2)(0,1,0)[365]*
-
-$$
-(1-\phi_{1}B-\phi_{2}B^{2})(1-B^{365})Z_{t}=(1+\theta_{1}B+\theta_{2}B^{2})a_{t}
-$$
-
-$$Z_{t}=Z_{t-365}+\phi_{1}Z_{t-1}-\phi_{1}Z_{t-366}+\phi_{2}Z_{t-2}-\phi_{2}Z_{t-367}+a_{t}+\theta_{1}a_{t-1}+\theta_{2}a_{t-2}$$
-$$ =Z_{t-365}+0.728Z_{t-1}-0.728Z_{t-366}-0.026Z_{t-2}+0.026Z_{t-367}+a_{t}+0.012a_{t-1}-0.151a_{t-2}$$
+Todas las métricas son muy diferentes entre los dos modelos y claramente el modelo SARIMA supera en habilidad predictiva al modelo ARIMA.
+Dado que el objetivo de este trabajo es determinar el mejor modelo para pronóstico de la undefined $SARIMA(1,0,2)\times(0,1,0)_{365}.$

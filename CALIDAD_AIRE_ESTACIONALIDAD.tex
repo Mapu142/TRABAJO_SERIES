@@ -1,0 +1,1333 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={CALIDAD\_AIRE\_ESTACIONALIDAD},
+  pdfauthor={María Paula Camargo Rincón; Laura Katherin Martinez Castiblanco; Yudy Vanessa Puerres Rosero},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{CALIDAD\_AIRE\_ESTACIONALIDAD}
+\author{María Paula Camargo Rincón \and Laura Katherin Martinez
+Castiblanco \and Yudy Vanessa Puerres Rosero}
+\date{2025-11-21}
+
+\begin{document}
+\maketitle
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{rm}\NormalTok{(}\AttributeTok{list=}\FunctionTok{ls}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\section{librerías}\label{libreruxedas}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#install.packages("readxl")}
+\CommentTok{\#install.packages("knitr")}
+\CommentTok{\#install.packages("forecast")}
+\CommentTok{\#install.packages("FinTS")}
+\CommentTok{\#install.packages("dplyr")}
+\CommentTok{\#install.packages("ggplot2")}
+\CommentTok{\#install.packages("lubridate")}
+\CommentTok{\#install.packages("zoo")}
+\CommentTok{\#install.packages("nortest")}
+\FunctionTok{library}\NormalTok{(readxl) }\CommentTok{\# Para leer el csv}
+\FunctionTok{library}\NormalTok{(knitr) }\CommentTok{\# Para obtener la tabla en el pdf a partir de una tabla en r}
+\FunctionTok{library}\NormalTok{(forecast) }\CommentTok{\# para el lambda de box{-}cox}
+\FunctionTok{library}\NormalTok{(tseries) }\CommentTok{\# prueba de estacionariedad adf}
+\FunctionTok{library}\NormalTok{(FinTS)}
+\FunctionTok{library}\NormalTok{(dplyr) }\CommentTok{\# para manejo de datos}
+\FunctionTok{library}\NormalTok{(ggplot2) }\CommentTok{\# para gráficas}
+\FunctionTok{library}\NormalTok{(lubridate) }\CommentTok{\# fechas}
+\FunctionTok{library}\NormalTok{(zoo) }\CommentTok{\#imputación de datos faltantes}
+\FunctionTok{library}\NormalTok{(nortest) }\CommentTok{\# para prueba kolmogorov}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Descripción de los datos:}\label{descripciuxf3n-de-los-datos}
+
+\subsection{Base de datos}\label{base-de-datos}
+
+La base de datos utilizada proviene del conjunto de datos público
+disponible en la plataforma Kaggle
+(\href{https://www.kaggle.com/datasets/rohanrao/air-quality-data-in-india}{Rohan
+Rao, 2020}). Este conjunto fue recopilado originalmente por el Central
+Pollution Control Board (CPCB\textbf{)}, organismo oficial del Gobierno
+de la India encargado del monitoreo ambiental.
+
+Para este estudio, se utilizó la versión diaria del conjunto de datos,
+enfocándose exclusivamente en la variable PM2.5 (µg/m³) (partículas en
+suspensión con diámetro aerodinámico \(\leq\) 2.5 µm) registrada en la
+ciudad de Delhi. La serie abarca el período comprendido entre el 1 de
+enero de 2015 y el 6 de diciembre de 2020, con observaciones diarias.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{aire }\OtherTok{\textless{}{-}} \FunctionTok{read\_excel}\NormalTok{(}\StringTok{"Datos\_India.xlsx"}\NormalTok{)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{head}\NormalTok{(aire,}\DecValTok{10}\NormalTok{),}
+             \AttributeTok{caption =} \StringTok{"Primeros 10 datos"}\NormalTok{,}
+             \AttributeTok{digits =} \DecValTok{4}\NormalTok{)  }\CommentTok{\# redondea a 4 decimales}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}llrl@{}}
+\caption{Primeros 10 datos}\tabularnewline
+\toprule\noalign{}
+City & Date & PM2.5 & AQI\_Bucket \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+City & Date & PM2.5 & AQI\_Bucket \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Delhi & 2015-01-01 & 313.22 & Severe \\
+Delhi & 2015-02-01 & 186.18 & Severe \\
+Delhi & 2015-03-01 & 87.18 & Moderate \\
+Delhi & 2015-04-01 & 151.84 & Very Poor \\
+Delhi & 2015-05-01 & 146.60 & Very Poor \\
+Delhi & 2015-06-01 & 149.58 & Very Poor \\
+Delhi & 2015-07-01 & 217.87 & Very Poor \\
+Delhi & 2015-08-01 & 229.90 & Very Poor \\
+Delhi & 2015-09-01 & 201.66 & Very Poor \\
+Delhi & 2015-10-01 & 221.02 & Very Poor \\
+\end{longtable}
+
+Además de PM2.5, el conjunto incluye el Índice de Calidad del Aire (AQI)
+y su clasificación categórica (\emph{AQI\_Bucket}), que divide la
+calidad del aire en seis niveles: \emph{Good}, \emph{Satisfactory},
+\emph{Moderate}, \emph{Poor}, \emph{Very Poor} y \emph{Severe}. Sin
+embargo, dado que el objetivo del análisis es modelar la dinámica
+temporal de la concentración de PM2.5, se trabajó únicamente con la
+variable numérica continua.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Convertir \textquotesingle{}City\textquotesingle{} y \textquotesingle{}AQI\_Bucket\textquotesingle{} a variables de tipo factor}
+\NormalTok{aire}\SpecialCharTok{$}\NormalTok{City }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(aire}\SpecialCharTok{$}\NormalTok{City)}
+\NormalTok{aire}\SpecialCharTok{$}\NormalTok{AQI\_Bucket }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(aire}\SpecialCharTok{$}\NormalTok{AQI\_Bucket)}
+
+\CommentTok{\# Convertir \textquotesingle{}Date\textquotesingle{} a una variable de fecha, especificando el formato}
+\NormalTok{aire}\SpecialCharTok{$}\NormalTok{Date }\OtherTok{\textless{}{-}} \FunctionTok{as.Date}\NormalTok{(aire}\SpecialCharTok{$}\NormalTok{Date, }\AttributeTok{format =} \StringTok{"\%d/\%m/\%Y"}\NormalTok{)}
+
+\FunctionTok{summary}\NormalTok{(aire)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##     City           Date                PM2.5               AQI_Bucket 
+##  Delhi:2009   Min.   :2015-01-01   Min.   : 10.24   Good        : 21  
+##               1st Qu.:2016-05-17   1st Qu.: 57.09   Moderate    :519  
+##               Median :2017-10-01   Median : 94.62   Poor        :542  
+##               Mean   :2017-10-04   Mean   :117.20   Satisfactory:158  
+##               3rd Qu.:2019-02-15   3rd Qu.:153.03   Severe      :239  
+##               Max.   :2020-12-06   Max.   :685.36   Very Poor   :520  
+##                                    NA's   :2        NA's        : 10
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{str}\NormalTok{(aire)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## tibble [2,009 x 4] (S3: tbl_df/tbl/data.frame)
+##  $ City      : Factor w/ 1 level "Delhi": 1 1 1 1 1 1 1 1 1 1 ...
+##  $ Date      : Date[1:2009], format: "2015-01-01" "2015-02-01" ...
+##  $ PM2.5     : num [1:2009] 313.2 186.2 87.2 151.8 146.6 ...
+##  $ AQI_Bucket: Factor w/ 6 levels "Good","Moderate",..: 5 5 2 6 6 6 6 6 6 6 ...
+\end{verbatim}
+
+\subsection{Evaluación de base de
+datos}\label{evaluaciuxf3n-de-base-de-datos}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Agrupar por fecha y contar el número de registros}
+\NormalTok{daily\_counts }\OtherTok{\textless{}{-}}\NormalTok{ aire }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Date) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{count =} \FunctionTok{n}\NormalTok{())}
+
+\CommentTok{\# Filtrar las fechas que tienen más de un registro}
+\NormalTok{dates\_with\_duplicates }\OtherTok{\textless{}{-}}\NormalTok{ daily\_counts }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(count }\SpecialCharTok{\textgreater{}} \DecValTok{1}\NormalTok{)}
+
+\CommentTok{\# Mostrar las fechas con registros duplicados}
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{nrow}\NormalTok{(dates\_with\_duplicates) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+  \FunctionTok{cat}\NormalTok{(}\StringTok{"Días con más de un valor de PM2.5:}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+  \FunctionTok{print}\NormalTok{(dates\_with\_duplicates)}
+\NormalTok{\} }\ControlFlowTok{else}\NormalTok{ \{}
+  \FunctionTok{cat}\NormalTok{(}\StringTok{"No hay días con más de un valor de PM2.5}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## No hay días con más de un valor de PM2.5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# eliminar daily\_counts para liberar memoria}
+\FunctionTok{rm}\NormalTok{(daily\_counts)}
+\end{Highlighting}
+\end{Shaded}
+
+El conjunto inicial contiene 2,009 observaciones. Se identificaron 2
+valores faltantes en la variable \texttt{PM2.5} y 10 en
+\texttt{AQI\_Bucket}. Dado que el AQI no se utilizará en el modelado, se
+centró la atención en imputar los valores ausentes de PM2.5. Se aplicó
+interpolación lineal mediante la función \texttt{na.approx()} del
+paquete \texttt{zoo}, asumiendo que la evolución de la contaminación en
+el corto plazo no es drástica.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{aire[}\SpecialCharTok{!}\FunctionTok{complete.cases}\NormalTok{(aire), ]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 11 x 4
+##    City  Date       PM2.5 AQI_Bucket
+##    <fct> <date>     <dbl> <fct>     
+##  1 Delhi 2016-07-24  59.4 <NA>      
+##  2 Delhi 2017-06-23  44.1 <NA>      
+##  3 Delhi 2017-12-08  NA   Good      
+##  4 Delhi 2017-08-13  NA   <NA>      
+##  5 Delhi 2017-08-14  26.5 <NA>      
+##  6 Delhi 2017-08-22  46   <NA>      
+##  7 Delhi 2017-08-23  36.5 <NA>      
+##  8 Delhi 2017-08-26  62.3 <NA>      
+##  9 Delhi 2017-08-27  34.3 <NA>      
+## 10 Delhi 2017-08-28  23.8 <NA>      
+## 11 Delhi 2017-08-29  15.2 <NA>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Usar interpolación lineal para rellenar valores faltantes en \textquotesingle{}PM2.5\textquotesingle{}}
+\CommentTok{\# Podemos usar la función na.approx del paquete zoo para la interpolación lineal.}
+\NormalTok{aire}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{PM2.5}\StringTok{\textasciigrave{}} \OtherTok{\textless{}{-}} \FunctionTok{na.approx}\NormalTok{(aire}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{PM2.5}\StringTok{\textasciigrave{}}\NormalTok{)}
+
+\CommentTok{\# Verificar que no haya más valores faltantes en \textquotesingle{}PM2.5\textquotesingle{}}
+\NormalTok{missing\_pm25\_after\_imputation }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(aire}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{PM2.5}\StringTok{\textasciigrave{}}\NormalTok{))}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Número de datos faltantes en \textquotesingle{}PM2.5\textquotesingle{} después de la imputación:"}\NormalTok{, missing\_pm25\_after\_imputation, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Número de datos faltantes en 'PM2.5' después de la imputación: 0
+\end{verbatim}
+
+Las estadísticas resumen de la serie de PM2.5 revelan una distribución
+altamente asimétrica hacia la derecha, con una media de 117.104 µg/m³,
+una mediana de 94.49 µg/m³ y un máximo extremo de 685.36 µg/m³.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Estadísticas descriptivas}
+\NormalTok{summary\_stats }\OtherTok{\textless{}{-}}\NormalTok{ aire }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}
+    \AttributeTok{Media =} \FunctionTok{mean}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{Mediana =} \FunctionTok{median}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{Desv\_Est =} \FunctionTok{sd}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{Min =} \FunctionTok{min}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{Max =} \FunctionTok{max}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{  )}
+
+\FunctionTok{kable}\NormalTok{(summary\_stats, }\AttributeTok{digits =} \DecValTok{3}\NormalTok{, }\AttributeTok{caption =} \StringTok{"Estadísticas descriptivas de PM2.5 "}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}rrrrr@{}}
+\caption{Estadísticas descriptivas de PM2.5}\tabularnewline
+\toprule\noalign{}
+Media & Mediana & Desv\_Est & Min & Max \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Media & Mediana & Desv\_Est & Min & Max \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+117.104 & 94.49 & 82.924 & 10.24 & 685.36 \\
+\end{longtable}
+
+\section{Identificación de modelos}\label{identificaciuxf3n-de-modelos}
+
+La gráfica de la serie de tiempo muestra una variabilidad, con
+estacionalidad clara (patrones repetidos, que parecieran ser anuales).
+Aunque no se observa una tendencia, la varianza no es constante puesto
+que los picos son más pronunciados en ciertos períodos del año, lo que
+sugiere heterocedasticidad.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Creación de la serie temporal}
+\NormalTok{start\_date }\OtherTok{\textless{}{-}} \FunctionTok{min}\NormalTok{(aire}\SpecialCharTok{$}\NormalTok{Date)}
+\NormalTok{end\_date }\OtherTok{\textless{}{-}} \FunctionTok{max}\NormalTok{(aire}\SpecialCharTok{$}\NormalTok{Date)}
+\NormalTok{PM2}\FloatTok{.5} \OtherTok{\textless{}{-}} \FunctionTok{ts}\NormalTok{(aire}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{PM2.5}\StringTok{\textasciigrave{}}\NormalTok{, }
+            \AttributeTok{start =} \FunctionTok{c}\NormalTok{(}\FunctionTok{year}\NormalTok{(start\_date), }\FunctionTok{month}\NormalTok{(start\_date), }\FunctionTok{day}\NormalTok{(start\_date)), }
+            \AttributeTok{end =} \FunctionTok{c}\NormalTok{(}\FunctionTok{year}\NormalTok{(end\_date), }\FunctionTok{month}\NormalTok{(end\_date), }\FunctionTok{day}\NormalTok{(end\_date)), }
+            \AttributeTok{frequency =} \DecValTok{365}\NormalTok{)}
+\NormalTok{PM2}\FloatTok{.5}\NormalTok{\_zoom }\OtherTok{\textless{}{-}} \FunctionTok{window}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{start =} \FunctionTok{c}\NormalTok{(}\DecValTok{2016}\NormalTok{, }\DecValTok{1}\NormalTok{), }\AttributeTok{end =} \FunctionTok{c}\NormalTok{(}\DecValTok{2018}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+
+\CommentTok{\# Configurar dos gráficos en una fila}
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+
+\CommentTok{\# Gráfico completo}
+\FunctionTok{ts.plot}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.5}\NormalTok{,}
+        \AttributeTok{ylab =} \StringTok{"PM2.5 promedio diario"}\NormalTok{, }\AttributeTok{xlab =} \StringTok{"Tiempo"}\NormalTok{,}
+        \AttributeTok{main =} \StringTok{"Serie completa"}\NormalTok{)}
+\CommentTok{\# Gráfico con zoom}
+\FunctionTok{ts.plot}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{\_zoom, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.5}\NormalTok{,}
+        \AttributeTok{ylab =} \StringTok{"PM2.5 promedio diario"}\NormalTok{, }\AttributeTok{xlab =} \StringTok{"Tiempo"}\NormalTok{,}
+        \AttributeTok{main =} \StringTok{"Zoom: 2016{-}2017"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Configurar panel 1x2: izquierda = serie completa, derecha = zoom}
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow =} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+
+\DocumentationTok{\#\# Panel izquierdo: Serie completa}
+\FunctionTok{acf}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{lag.max =} \DecValTok{800}\NormalTok{, }\AttributeTok{main =} \StringTok{"ACF {-} 2 años"}\NormalTok{, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \DecValTok{1}\NormalTok{) }\CommentTok{\# 800 \textgreater{} 2*365 → muestra más de 2 años}
+\FunctionTok{pacf}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{lag.max =} \DecValTok{800}\NormalTok{, }\AttributeTok{main =} \StringTok{"PACF {-} 2 años"}\NormalTok{, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \DecValTok{1}\NormalTok{)}
+\DocumentationTok{\#\# Panel derecho: Serie con zoom (subconjunto)}
+\FunctionTok{acf}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{lag.max =} \DecValTok{200}\NormalTok{, }\AttributeTok{main =} \StringTok{"ACF {-} Zoom (1er año)"}\NormalTok{, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \DecValTok{1}\NormalTok{)   }\CommentTok{\# ajusta lag.max al tamaño del subconjunto}
+\FunctionTok{pacf}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{lag.max =} \DecValTok{50}\NormalTok{, }\AttributeTok{main =} \StringTok{"PACF {-} Zoom (1/4 de año)"}\NormalTok{, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.25}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+Podemos ver picos altos en los lag \(0\), \(1\) y \(2\) en el ACF, los
+cuales son decrecientes y hacen referencia a la estacionalidad anual, es
+decir el lag 1 hace referencia al día 365 (1 año), el lag 2 al día 730
+(2 años).
+
+Para evaluar formalmente la estacionariedad en media (la cual segun
+gráficos parece ser estacionaria), se usa la prueba de Dickey-Fuller
+(ADF). El estadístico resultante fue -4.7414 con un p-valor \textless{}
+0.01, lo que permite rechazar la hipótesis nula de raíz unitaria. Por lo
+tanto, la serie se considera estacionaria.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{adf.test}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{alternative =} \StringTok{"stationary"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in adf.test(PM2.5, alternative = "stationary"): p-value smaller than
+## printed p-value
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Augmented Dickey-Fuller Test
+## 
+## data:  PM2.5
+## Dickey-Fuller = -4.7414, Lag order = 12, p-value = 0.01
+## alternative hypothesis: stationary
+\end{verbatim}
+
+Al aplicar la descomposición STL (Seasonal-Trend-Loess) se confirma
+visualmente lo encontrado anteriormente; El componente estacional exhibe
+un patrón anual repetitivo, con picos consistentes a finales de año. Al
+evaluar la tendencia de la serie, se evidencia como aumentan la cantidad
+de PM2.5, la cual se reduce considerablemente en lo que parese el
+periodo de pandemia.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Descomposición STL}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{stl}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{s.window =} \StringTok{"periodic"}\NormalTok{), }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.25}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+Dada la heterocedasticidad, se evaluo una transformación para
+estabilizar la varianza. Se estimó el parámetro de Box-Cox, obteniéndo
+\(\lambda\) \(\approx\) 0.257, cercano a cero. Por lo cual se aplicó la
+transformación logarítmica.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lambda }\OtherTok{\textless{}{-}} \FunctionTok{BoxCox.lambda}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{)}
+\NormalTok{lambda}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2571413
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Transformación logarítmica}
+\NormalTok{l.PM2}\FloatTok{.5} \OtherTok{\textless{}{-}} \FunctionTok{log}\NormalTok{(PM2}\FloatTok{.5}\NormalTok{)}
+\FunctionTok{ts.plot}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.25}\NormalTok{,}
+        \AttributeTok{ylab =} \StringTok{"log(PM2.5 promedio diario)"}\NormalTok{,}
+        \AttributeTok{main =} \StringTok{"Serie transformada logarítmicamente"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+La serie transformada presenta una varianza más homogénea y mantiene la
+estacionariedad en media (prueba ADF con p-valor \(\approx\) 0.027), sin
+embargo, a su vez mantiene la estacionalidad anual.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{adf.test}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{,}\AttributeTok{alternative =} \StringTok{"stationary"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Augmented Dickey-Fuller Test
+## 
+## data:  l.PM2.5
+## Dickey-Fuller = -3.6549, Lag order = 12, p-value = 0.02739
+## alternative hypothesis: stationary
+\end{verbatim}
+
+Luego de aplicar la transformación logarítmica a la serie de PM2.5, el
+test de Dickey--Fuller Aumentado (ADF) arrojó un estadístico de -3.65
+con un p-valor de 0.027, lo que indicaría estacionariedad a un nivel de
+significancia del 5\%. Sin embargo, la inspección de la función de
+autocorrelación (ACF) revela un decaimiento lento, señal de persistencia
+temporal y posible estacionalidad anual.
+
+A su vez se observa en la descomposición STL que la estructura
+estacional anual persiste con patrones cíclicos bien definidos cada año.
+Ademas al evaluar los residuales reflejan un comportamiento aleatorio,
+luego la transformación permite capturar adecuadamente la serie.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Descomposición STL }
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{stl}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{s.window =} \StringTok{"periodic"}\NormalTok{), }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.25}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+Dada la estacionalidad persistente de la serie log-transformada aún no
+puede considerarse estrictamente estacionaria (decaimiento lento del
+ACF), y se considera aplicar una diferenciación regular (d = 1) o
+incluir una componente estacional al modelo.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+
+\FunctionTok{acf}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{lag.max =} \DecValTok{1000}\NormalTok{, }\AttributeTok{main =} \StringTok{"ACF "}\NormalTok{, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \DecValTok{1}\NormalTok{)  }\CommentTok{\# decaimiento lento indica que la serie no es estacionaria}
+\FunctionTok{pacf}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{lag.max =} \DecValTok{50}\NormalTok{, }\AttributeTok{main =} \StringTok{"PACF {-} Zoom (1/4 de año)"}\NormalTok{, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.25}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-15-1.pdf}
+
+Por lo tanto, se plantea un primer modelo con una diferenciación de
+primer orden \((1-B)Z_{t}\) con el fin de eliminar la tendencia presente
+en la serie. La inspección de la serie transformada muestra oscilaciones
+alrededor de una media constante, sin tendencias visibles.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d.l.PM2}\FloatTok{.5} \OtherTok{\textless{}{-}} \FunctionTok{diff}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{,}\AttributeTok{differences =} \DecValTok{1}\NormalTok{) }\CommentTok{\# Retorno de PM2.5}
+
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{stl}\NormalTok{(d.l.PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{s.window =} \StringTok{"periodic"}\NormalTok{), }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.25}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# ts.plot(d.l.PM2.5, col = "darkcyan", lwd = 1.25,}
+\CommentTok{\#         ylab = " difflog(PM2.5 promedio diario)", xlab = "Tiempo",}
+\CommentTok{\#         main = "Serie con diff de la transformación logaritmo")}
+\end{Highlighting}
+\end{Shaded}
+
+La descomposición STL revela que el componente ``data'' ya no presenta
+tendencia visible, con oscilaciones centradas alrededor de cero,
+mientras que el componente ``seasonal'' mantiene su estructura anual,
+aunque con amplitud reducida, lo que sugiere que la diferenciación
+eliminó la tendencia sin afectar significativamente la estacionalidad
+subyacente.
+
+Asimismo, la función de autocorrelación (ACF) decae rápidamente tras el
+primer rezago, indicando ausencia de dependencia de largo plazo,
+mientras que la PACF muestra un patrón más localizado, lo cual es
+consistente con la presencia de estacionalidad.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\FunctionTok{acf}\NormalTok{(d.l.PM2}\FloatTok{.5}\NormalTok{,}\AttributeTok{lag.max =} \DecValTok{100}\NormalTok{, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.25}\NormalTok{)}
+\FunctionTok{pacf}\NormalTok{(d.l.PM2}\FloatTok{.5}\NormalTok{,}\AttributeTok{lag.max =} \DecValTok{100}\NormalTok{, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.25}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-17-1.pdf}
+
+El test de Dickey--Fuller Aumentado (ADF) arrojó un estadístico de
+-16.31 con un p-valor \textless{} 0.01, indicando que la serie
+diferenciada efectivamente es estacionaria.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{adf.test}\NormalTok{(d.l.PM2}\FloatTok{.5}\NormalTok{,}\AttributeTok{alternative =} \StringTok{"stationary"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in adf.test(d.l.PM2.5, alternative = "stationary"): p-value smaller
+## than printed p-value
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Augmented Dickey-Fuller Test
+## 
+## data:  d.l.PM2.5
+## Dickey-Fuller = -16.31, Lag order = 12, p-value = 0.01
+## alternative hypothesis: stationary
+\end{verbatim}
+
+En conjunto, estos resultados validan que la serie transformada y
+diferenciada cumple con los supuestos de estacionariedad requeridos para
+la identificación y ajuste de modelos lineales de series temporales.
+
+Por otro lado se quiere comparar con un modelo que tenga en cuenta la
+estacionalidad y se evalua el modelo diferenciado con respecto a la
+estacionalidad de la serie con tranformación \(\log\), es decir se tiene
+la siguiente serie \((1-B^{365})Z_{t}\).
+
+Esta serie presenta en su descomposición STL oscilaciones alrededor de
+cero, sin tendencia aparente en ``data'', mientras que el componente
+``seasonal'' es notablemente atenuado, indicando que la diferenciación
+estacional ha eliminado eficazmente el patrón anual subyacente. El
+componente de ``trend'', aunque suave, muestra una ligera declinación en
+los últimos años, sugiriendo una posible mejora relativa en los niveles
+promedio de contaminación tras la remoción de la estacionalidad.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ds.l.PM2}\FloatTok{.5} \OtherTok{\textless{}{-}} \FunctionTok{diff}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{,}\AttributeTok{lag =} \DecValTok{365}\NormalTok{) }\CommentTok{\# Retorno de PM2.5}
+
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{stl}\NormalTok{(ds.l.PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{s.window =} \StringTok{"periodic"}\NormalTok{), }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.25}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-19-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# ts.plot(ds.l.PM2.5, col = "darkcyan", lwd = 1.25,}
+\CommentTok{\#         ylab = " diff(log(PM2.5 promedio diario)", xlab = "Tiempo",}
+\CommentTok{\#         main = "Serie con diff de la transformación logaritmo")}
+\end{Highlighting}
+\end{Shaded}
+
+Por otro lado, la prueba de Dickey-Fuller Aumentada arrojó un
+estadístico de -9.0883 (p-valor \textless{} 0.01), lo que permite
+rechazar con gran certeza la hipótesis nula de raíz unitaria,
+confirmando la estacionariedad de la serie diferenciada.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{adf.test}\NormalTok{(ds.l.PM2}\FloatTok{.5}\NormalTok{,}\AttributeTok{alternative =} \StringTok{"stationary"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in adf.test(ds.l.PM2.5, alternative = "stationary"): p-value smaller
+## than printed p-value
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Augmented Dickey-Fuller Test
+## 
+## data:  ds.l.PM2.5
+## Dickey-Fuller = -9.0883, Lag order = 11, p-value = 0.01
+## alternative hypothesis: stationary
+\end{verbatim}
+
+Asimismo, la función de autocorrelación (ACF) presenta rezagos
+significativos en los primeros valores y en múltiplos de 365, lo cual
+refleja la persistencia de cierta estructura residual estacional,
+mientras que la PACF decrece rápidamente, sugiriendo que un modelo
+SARIMA con componentes autorregresivos y de media móvil podría ser
+adecuado para capturar la dinámica restante.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\FunctionTok{acf}\NormalTok{(ds.l.PM2}\FloatTok{.5}\NormalTok{,}\AttributeTok{lag.max =} \DecValTok{800}\NormalTok{, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \DecValTok{1}\NormalTok{)}
+\FunctionTok{pacf}\NormalTok{(ds.l.PM2}\FloatTok{.5}\NormalTok{,}\AttributeTok{lag.max =} \DecValTok{800}\NormalTok{, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{, }\AttributeTok{lwd =} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-21-1.pdf}
+
+En conjunto, estos resultados validan que la serie transformada y
+diferenciada estacionalmente cumple con los supuestos de estacionariedad
+requeridos para la identificación y ajuste de modelos ARIMA y SARIMA.
+
+\section{Estimación del modelo}\label{estimaciuxf3n-del-modelo}
+
+Se procedió a ajustar dos modelos candidatos: un modelo \(ARMA(2,2)\) y
+un \(SARIMA(2,0,2)\times (0,1,0)_{365}\) .Sin embargo, dadas las
+limitaciones computacionales asociadas con la especificación
+\(SARIMA(2,0,2) \times (0,1,0)_{365}\), especialmente por la alta
+dimensionalidad del operador estacional (periodo = \(365\)), se optó por
+emplear la función \texttt{auto.arima()} con restricciones que
+mantuvieran la estructura no estacional dentro del rango propuesto
+(hasta orden 2 en \(AR\) y \(MA\)) y fijaran el componente estacional a
+\((0,1,0)\). Adicionalmente, mas adelante se cmprueba que estos dos
+modelos SARIMA se comportan de similar manera, luego es preferible
+trabajar con el modelo de menor costo computacional.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{arma2}\FloatTok{.2} \OtherTok{\textless{}{-}} \FunctionTok{arima}\NormalTok{(}\AttributeTok{x =}\NormalTok{ l.PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{order =} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\NormalTok{arma2}\FloatTok{.2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## arima(x = l.PM2.5, order = c(2, 0, 2))
+## 
+## Coefficients:
+##          ar1      ar2      ma1      ma2  intercept
+##       1.3806  -0.3876  -0.5955  -0.2087     4.5934
+## s.e.  0.0569   0.0557   0.0584   0.0368     0.1806
+## 
+## sigma^2 estimated as 0.0822:  log likelihood = -312.7,  aic = 637.39
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#muy pesado computacionalmente}
+\NormalTok{sarima2.}\FloatTok{0.2}\NormalTok{x0.}\FloatTok{1.0} \OtherTok{\textless{}{-}} \FunctionTok{Arima}\NormalTok{(}
+\NormalTok{  l.PM2}\FloatTok{.5}\NormalTok{,}
+  \AttributeTok{order =} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{2}\NormalTok{),}
+  \AttributeTok{seasonal =} \FunctionTok{list}\NormalTok{(}\AttributeTok{order =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{0}\NormalTok{), }\AttributeTok{period =} \DecValTok{365}\NormalTok{),}
+  \AttributeTok{optim.control =} \FunctionTok{list}\NormalTok{(}\AttributeTok{maxit =} \DecValTok{5}\NormalTok{)  }\CommentTok{\# límite de iteraciones}
+\NormalTok{  )}
+
+\CommentTok{\#SARIMA con auto.arima optimizado (más inteligente)}
+\NormalTok{sarima\_auto }\OtherTok{\textless{}{-}} \FunctionTok{auto.arima}\NormalTok{(}
+\NormalTok{  l.PM2}\FloatTok{.5}\NormalTok{,}
+  \AttributeTok{d =} \DecValTok{0}\NormalTok{,              }\CommentTok{\# Ya aplicamos transformación}
+  \AttributeTok{D =} \DecValTok{1}\NormalTok{,              }\CommentTok{\# Diferenciación estacional}
+  \AttributeTok{max.p =} \DecValTok{2}\NormalTok{, }\AttributeTok{max.q =} \DecValTok{2}\NormalTok{,}
+  \AttributeTok{max.P =} \DecValTok{0}\NormalTok{, }\AttributeTok{max.Q =} \DecValTok{0}\NormalTok{,}
+  \AttributeTok{seasonal =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{stepwise =} \ConstantTok{TRUE}\NormalTok{,    }\CommentTok{\# para velocidad}
+  \AttributeTok{approximation =} \ConstantTok{TRUE}\NormalTok{, }\CommentTok{\# para series largas}
+  \AttributeTok{trace =} \ConstantTok{TRUE}        \CommentTok{\# Para monitorear progreso}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Fitting models using approximations to speed things up...
+## 
+##  ARIMA(2,0,2)(0,1,0)[365] with drift         : 1794.225
+##  ARIMA(0,0,0)(0,1,0)[365] with drift         : 2629.476
+##  ARIMA(1,0,0)(0,1,0)[365] with drift         : 1822.401
+##  ARIMA(0,0,1)(0,1,0)[365] with drift         : 1954.955
+##  ARIMA(0,0,0)(0,1,0)[365]                    : 2643.454
+##  ARIMA(1,0,2)(0,1,0)[365] with drift         : 1792.139
+##  ARIMA(0,0,2)(0,1,0)[365] with drift         : 1846.716
+##  ARIMA(1,0,1)(0,1,0)[365] with drift         : 1798.645
+##  ARIMA(2,0,1)(0,1,0)[365] with drift         : 1797.926
+##  ARIMA(1,0,2)(0,1,0)[365]                    : 1793.781
+## 
+##  Now re-fitting the best model(s) without approximations...
+## 
+##  ARIMA(1,0,2)(0,1,0)[365] with drift         : 1285.294
+## 
+##  Best model: ARIMA(1,0,2)(0,1,0)[365] with drift
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sarima\_auto}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Series: l.PM2.5 
+## ARIMA(1,0,2)(0,1,0)[365] with drift 
+## 
+## Coefficients:
+##          ar1     ma1      ma2   drift
+##       0.6698  0.0670  -0.1365  -1e-04
+## s.e.  0.0519  0.0604   0.0451   1e-04
+## 
+## sigma^2 = 0.1396:  log likelihood = -637.63
+## AIC=1285.25   AICc=1285.29   BIC=1311.73
+\end{verbatim}
+
+En cuanto al modelo \(ARMA(2,2)\), este logró un ajuste más preciso en
+la muestra de entrenamiento, evidenciado por métricas de error
+inferiores en comparación con el modelo SARIMA estimado. Sin embargo hay
+que considerar que aunque pareciera predecir mejor el modelo ARIMA, muy
+seguramente serría para pronosticos cercanos y no a largo plazo, pues no
+concidera la estacionariedad.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Obtener métricas de error en la muestra de entrenamiento}
+\NormalTok{acc\_arma2}\FloatTok{.2}    \OtherTok{\textless{}{-}} \FunctionTok{accuracy}\NormalTok{(arma2}\FloatTok{.2}\NormalTok{)}
+\NormalTok{acc\_sarima2.}\FloatTok{0.2}\NormalTok{x0.}\FloatTok{1.0} \OtherTok{\textless{}{-}} \FunctionTok{accuracy}\NormalTok{(sarima2.}\FloatTok{0.2}\NormalTok{x0.}\FloatTok{1.0}\NormalTok{)}
+\NormalTok{acc\_sarima\_auto }\OtherTok{\textless{}{-}} \FunctionTok{accuracy}\NormalTok{(sarima\_auto)}
+\CommentTok{\# Crear tabla comparativa}
+\NormalTok{comparacion }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{Modelo =} \FunctionTok{c}\NormalTok{(}\StringTok{"ARMA(2,2)"}\NormalTok{, }\StringTok{"SARIMA(1,0,2)(0,1,0)[365]"}\NormalTok{, }\StringTok{"SARIMA(2,0,2)(0,1,0)[365]"}\NormalTok{),}
+  \AttributeTok{RMSE =} \FunctionTok{c}\NormalTok{(acc\_arma2}\FloatTok{.2}\NormalTok{[}\DecValTok{1}\NormalTok{, }\StringTok{"RMSE"}\NormalTok{],}
+\NormalTok{           acc\_sarima\_auto[}\DecValTok{1}\NormalTok{, }\StringTok{"RMSE"}\NormalTok{],}
+\NormalTok{           acc\_sarima2.}\FloatTok{0.2}\NormalTok{x0.}\FloatTok{1.0}\NormalTok{[}\DecValTok{1}\NormalTok{, }\StringTok{"RMSE"}\NormalTok{]),}
+  \AttributeTok{MAE  =} \FunctionTok{c}\NormalTok{(acc\_arma2}\FloatTok{.2}\NormalTok{[}\DecValTok{1}\NormalTok{, }\StringTok{"MAE"}\NormalTok{],}
+\NormalTok{           acc\_sarima\_auto[}\DecValTok{1}\NormalTok{, }\StringTok{"MAE"}\NormalTok{],}
+\NormalTok{           acc\_sarima2.}\FloatTok{0.2}\NormalTok{x0.}\FloatTok{1.0}\NormalTok{[}\DecValTok{1}\NormalTok{, }\StringTok{"MAE"}\NormalTok{]),}
+  \AttributeTok{MAPE =} \FunctionTok{c}\NormalTok{(acc\_arma2}\FloatTok{.2}\NormalTok{[}\DecValTok{1}\NormalTok{, }\StringTok{"MAPE"}\NormalTok{],}
+\NormalTok{           acc\_sarima\_auto[}\DecValTok{1}\NormalTok{, }\StringTok{"MAPE"}\NormalTok{],}
+\NormalTok{           acc\_sarima2.}\FloatTok{0.2}\NormalTok{x0.}\FloatTok{1.0}\NormalTok{[}\DecValTok{1}\NormalTok{, }\StringTok{"MAPE"}\NormalTok{])}
+\NormalTok{)}
+
+\CommentTok{\# Mostrar tabla}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(comparacion,}
+             \AttributeTok{caption =} \StringTok{"Comparación de métricas de error en la muestra de entrenamiento"}\NormalTok{,}
+             \AttributeTok{digits =} \DecValTok{4}\NormalTok{,}
+             \AttributeTok{row.names =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}lrrr@{}}
+\caption{Comparación de métricas de error en la muestra de
+entrenamiento}\tabularnewline
+\toprule\noalign{}
+Modelo & RMSE & MAE & MAPE \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Modelo & RMSE & MAE & MAPE \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+ARMA(2,2) & 0.2867 & 0.2195 & 5.0131 \\
+SARIMA(1,0,2)(0,1,0){[}365{]} & 0.3340 & 0.2331 & 5.3294 \\
+SARIMA(2,0,2)(0,1,0){[}365{]} & 0.3380 & 0.2352 & 5.3890 \\
+\end{longtable}
+
+\subsection{Fórmulas estimadas de los
+modelos}\label{fuxf3rmulas-estimadas-de-los-modelos}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Extraer coeficientes y sus errores estándar}
+\NormalTok{extraer\_coeficientes }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(modelo, nombre) \{}
+\NormalTok{  coefs }\OtherTok{\textless{}{-}} \FunctionTok{coef}\NormalTok{(modelo)}
+\NormalTok{  se }\OtherTok{\textless{}{-}} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{diag}\NormalTok{(modelo}\SpecialCharTok{$}\NormalTok{var.coef))}
+\NormalTok{  out }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+    \AttributeTok{Modelo =}\NormalTok{ nombre,}
+    \AttributeTok{Coeficiente =} \FunctionTok{names}\NormalTok{(coefs),}
+    \AttributeTok{Estimado =} \FunctionTok{round}\NormalTok{(coefs, }\DecValTok{4}\NormalTok{),}
+    \AttributeTok{Error =} \FunctionTok{round}\NormalTok{(se[}\FunctionTok{match}\NormalTok{(}\FunctionTok{names}\NormalTok{(coefs), }\FunctionTok{names}\NormalTok{(se))], }\DecValTok{4}\NormalTok{),}
+    \AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}
+\NormalTok{  )}
+  \FunctionTok{return}\NormalTok{(out)}
+\NormalTok{\}}
+
+\CommentTok{\# Crear tabla combinada}
+\NormalTok{tabla\_coef }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(}
+  \FunctionTok{extraer\_coeficientes}\NormalTok{(arma2}\FloatTok{.2}\NormalTok{, }\StringTok{"ARMA(2,2)"}\NormalTok{),}
+  \FunctionTok{extraer\_coeficientes}\NormalTok{(sarima\_auto, }\StringTok{"SARIMA(1,0,2)(0,1,0)[365]"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# Mostrar en formato bonito}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(tabla\_coef, }
+             \AttributeTok{caption =} \StringTok{"Coeficientes estimados de los modelos"}\NormalTok{,}
+             \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Modelo"}\NormalTok{, }\StringTok{"Parámetro"}\NormalTok{, }\StringTok{"Estimación"}\NormalTok{, }\StringTok{"Error estándar"}\NormalTok{),}
+             \AttributeTok{digits =} \DecValTok{4}\NormalTok{,}
+             \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1389}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.3611}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1389}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1528}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2083}}@{}}
+\caption{Coeficientes estimados de los modelos}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Modelo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Parámetro
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Estimación
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Error estándar
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Modelo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Parámetro
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Estimación
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Error estándar
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+ar1 & ARMA(2,2) & ar1 & 1.3806 & 0.0569 \\
+ar2 & ARMA(2,2) & ar2 & -0.3876 & 0.0557 \\
+ma1 & ARMA(2,2) & ma1 & -0.5955 & 0.0584 \\
+ma2 & ARMA(2,2) & ma2 & -0.2087 & 0.0368 \\
+intercept & ARMA(2,2) & intercept & 4.5934 & 0.1806 \\
+ar11 & SARIMA(1,0,2)(0,1,0){[}365{]} & ar1 & 0.6698 & 0.0519 \\
+ma11 & SARIMA(1,0,2)(0,1,0){[}365{]} & ma1 & 0.0670 & 0.0604 \\
+ma21 & SARIMA(1,0,2)(0,1,0){[}365{]} & ma2 & -0.1365 & 0.0451 \\
+drift & SARIMA(1,0,2)(0,1,0){[}365{]} & drift & -0.0001 & 0.0001 \\
+\end{longtable}
+
+\subsubsection{\texorpdfstring{Modelo
+\(ARMA(2,2)\)}{Modelo ARMA(2,2)}}\label{modelo-arma22}
+
+El modelo ARMA(2,2) ajustado a la serie transformada
+\(\log(\text{PM2.5}_t)\) tiene la forma:
+
+\[
+\log(\text{PM2.5}_t) = 4.5934 + 1.3806 \cdot \log(\text{PM2.5}_{t-1}) - 0.3876 \cdot \log(\text{PM2.5}_{t-2}) + a_t - 0.5955 \cdot a_{t-1} - 0.2087 \cdot a_{t-2}
+\]
+
+donde \(a_t\) es el término de error (ruido blanco).
+
+\subsubsection{\texorpdfstring{Modelo
+\(SARIMA(1,0,2) \times (0,1,0)_{365}\)}{Modelo SARIMA(1,0,2) \textbackslash times (0,1,0)\_\{365\}}}\label{modelo-sarima102-times-010_365}
+
+El modelo \(SARIMA(1,0,2) \times (0,1,0)_{365}\) ajustado a la misma
+serie transformada se expresa como:
+
+\[
+(1 - B^{365}) \log(\text{PM2.5}_t) = -0.0001 \cdot t + 0.6698 \cdot (1 - B^{365}) \log(\text{PM2.5}_{t-1}) + A_t + 0.0670 \cdot a_{t-1} - 0.1365 \cdot a_{t-2}
+\]
+
+o, de forma equivalente en su representación no diferenciada:
+
+\[
+\log(\text{PM2.5}_t) = \log(\text{PM2.5}_{t-365}) - 0.0001 \cdot t + 0.6698 \cdot \left( \log(\text{PM2.5}_{t-1}) - \log(\text{PM2.5}_{t-366}) \right) + a_t + 0.0670 \cdot a_{t-1} - 0.1365 \cdot a_{t-2}
+\]
+
+\section{Validación de los modelos}\label{validaciuxf3n-de-los-modelos}
+
+Para garantizar la validez de los modelos ajustados (\(ARMA(2,2)\) y
+\(SARIMA(1,0,2) \times (0,1,0)_{365}\)) se procedió a evaluar si sus
+residuales cumplen con los supuestos teóricos de un proceso de ruido
+blanco: ausencia de autocorrelación, homocedasticidad y distribución
+aproximadamente normal.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Función para validar residuales de un modelo}
+\NormalTok{check\_whiteness }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(modelo, model\_name, }\AttributeTok{period =} \DecValTok{365}\NormalTok{) \{}
+  \FunctionTok{cat}\NormalTok{(}\StringTok{"=== Validación de residuales:"}\NormalTok{, model\_name, }\StringTok{"===}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{  resid }\OtherTok{\textless{}{-}} \FunctionTok{residuals}\NormalTok{(modelo)}
+  \CommentTok{\# Histograma y Q{-}Q plot}
+  \FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+  \FunctionTok{qqnorm}\NormalTok{(resid, }\AttributeTok{main =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Q{-}Q Plot:"}\NormalTok{, model\_name))}
+  \FunctionTok{qqline}\NormalTok{(resid, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{)}
+  
+  \CommentTok{\# ACF y PACF de los residuales (hasta 800 rezagos para ver estacionalidad)}
+  \FunctionTok{pacf}\NormalTok{(resid, }\AttributeTok{lag.max =} \DecValTok{800}\NormalTok{, }\AttributeTok{main =} \FunctionTok{paste}\NormalTok{(}\StringTok{"PACF de residuales:"}\NormalTok{, model\_name), }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{)}
+  
+  \FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+  \FunctionTok{checkresiduals}\NormalTok{(modelo, }\AttributeTok{col =} \StringTok{"darkcyan"}\NormalTok{)}
+  \CommentTok{\# Prueba de Ljung{-}Box: rezagos clave}
+  \CommentTok{\# Rezago 20: dependencia general}
+\NormalTok{  lb20 }\OtherTok{\textless{}{-}} \FunctionTok{Box.test}\NormalTok{(resid, }\AttributeTok{lag =} \DecValTok{20}\NormalTok{, }\AttributeTok{type =} \StringTok{"Ljung{-}Box"}\NormalTok{)}
+  \CommentTok{\# Rezago 365: dependencia estacional anual}
+\NormalTok{  lb365 }\OtherTok{\textless{}{-}} \FunctionTok{Box.test}\NormalTok{(resid, }\AttributeTok{lag =} \DecValTok{365}\NormalTok{, }\AttributeTok{type =} \StringTok{"Ljung{-}Box"}\NormalTok{)}
+  \CommentTok{\# Rezago 730: dependencia estacional a 2 años}
+\NormalTok{  lb730 }\OtherTok{\textless{}{-}} \FunctionTok{Box.test}\NormalTok{(resid, }\AttributeTok{lag =} \DecValTok{730}\NormalTok{, }\AttributeTok{type =} \StringTok{"Ljung{-}Box"}\NormalTok{)}
+  
+  \FunctionTok{cat}\NormalTok{(}\StringTok{"Prueba Ljung{-}Box (lag=20):  p{-}valor ="}\NormalTok{, }\FunctionTok{round}\NormalTok{(lb20}\SpecialCharTok{$}\NormalTok{p.value, }\DecValTok{4}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+  \FunctionTok{cat}\NormalTok{(}\StringTok{"Prueba Ljung{-}Box (lag=365): p{-}valor ="}\NormalTok{, }\FunctionTok{round}\NormalTok{(lb365}\SpecialCharTok{$}\NormalTok{p.value, }\DecValTok{4}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+  \FunctionTok{cat}\NormalTok{(}\StringTok{"Prueba Ljung{-}Box (lag=730): p{-}valor ="}\NormalTok{, }\FunctionTok{round}\NormalTok{(lb730}\SpecialCharTok{$}\NormalTok{p.value, }\DecValTok{4}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+  
+  \ControlFlowTok{if}\NormalTok{ (lb365}\SpecialCharTok{$}\NormalTok{p.value }\SpecialCharTok{\textgreater{}} \FloatTok{0.05}\NormalTok{) \{}
+    \FunctionTok{cat}\NormalTok{(}\StringTok{"→ No hay evidencia de autocorrelación estacional en los residuales (lag=365).}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{ \{}
+    \FunctionTok{cat}\NormalTok{(}\StringTok{"→ ¡Advertencia! Posible autocorrelación estacional en residuales (lag=365).}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{  \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{\texorpdfstring{Modelo
+\(ARMA(2,2)\)}{Modelo ARMA(2,2)}}\label{modelo-arma22-1}
+
+Al evaluar los residuales no se encuentran patrones evidentes ni cambios
+en la varianza. El histograma muestra una distribución simétrica y
+centrada en cero, mientras que el gráfico Q-Q confirma una buena
+aproximación a la normalidad, especialmente en las colas intermedias.
+
+La función de autocorrelación parcial (PACF) de los residuales no
+presenta picos significativos en los primeros rezagos, lo cual sugiere
+ausencia de dependencia temporal local. Además, la prueba de Ljung-Box
+aplicada en múltiplos del período estacional (lag = 365 y lag = 730)
+arroja p-valores superiores a 0.05 (p = 0.1211 y p = 0.0201,
+respectivamente), lo que indica ausencia de autocorrelación estacional
+significativa en los residuales.~
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Aplicar validación a ambos modelos}
+\FunctionTok{check\_whiteness}\NormalTok{(arma2}\FloatTok{.2}\NormalTok{, }\StringTok{"ARMA(2,2)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## === Validación de residuales: ARMA(2,2) ===
+\end{verbatim}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-26-1.pdf}
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-26-2.pdf}
+
+\begin{verbatim}
+## 
+##  Ljung-Box test
+## 
+## data:  Residuals from ARIMA(2,0,2) with non-zero mean
+## Q* = 400.43, df = 363, p-value = 0.08556
+## 
+## Model df: 4.   Total lags used: 367
+## 
+## Prueba Ljung-Box (lag=20):  p-valor = 0.0393 
+## Prueba Ljung-Box (lag=365): p-valor = 0.1211 
+## Prueba Ljung-Box (lag=730): p-valor = 0.0201 
+## → No hay evidencia de autocorrelación estacional en los residuales (lag=365).
+\end{verbatim}
+
+\subsection{Modelos SARIMA}\label{modelos-sarima}
+
+En este caso es mas evidente que ambos modelos son equivalentes en sus
+desempeños. Se tiene un Q-Q plot aceptable a excepción por la
+concentración en la media dada por la aparente autocorrelación.
+
+La prueba de Ljung-Box aplicada al rezago 365 arroja un p-valor nulo (p
+≈ 0), lo que implica evidencia estadísticamente significativa de
+autocorrelación estacional en los residuales. Esto a pesar de incluir
+parte estacional en el modelo.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{check\_whiteness}\NormalTok{(sarima\_auto, }\StringTok{"SARIMA(1,0,2)(0,1,0)[365]"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## === Validación de residuales: SARIMA(1,0,2)(0,1,0)[365] ===
+\end{verbatim}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-27-1.pdf}
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-27-2.pdf}
+
+\begin{verbatim}
+## 
+##  Ljung-Box test
+## 
+## data:  Residuals from ARIMA(1,0,2)(0,1,0)[365] with drift
+## Q* = 778.92, df = 364, p-value < 2.2e-16
+## 
+## Model df: 3.   Total lags used: 367
+## 
+## Prueba Ljung-Box (lag=20):  p-valor = 7e-04 
+## Prueba Ljung-Box (lag=365): p-valor = 0 
+## Prueba Ljung-Box (lag=730): p-valor = 0 
+## → ¡Advertencia! Posible autocorrelación estacional en residuales (lag=365).
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{check\_whiteness}\NormalTok{(sarima2.}\FloatTok{0.2}\NormalTok{x0.}\FloatTok{1.0}\NormalTok{, }\StringTok{"SARIMA(2,0,2)(0,1,0)[365]"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## === Validación de residuales: SARIMA(2,0,2)(0,1,0)[365] ===
+\end{verbatim}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-27-3.pdf}
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-27-4.pdf}
+
+\begin{verbatim}
+## 
+##  Ljung-Box test
+## 
+## data:  Residuals from ARIMA(2,0,2)(0,1,0)[365]
+## Q* = 885.24, df = 363, p-value < 2.2e-16
+## 
+## Model df: 4.   Total lags used: 367
+## 
+## Prueba Ljung-Box (lag=20):  p-valor = 0 
+## Prueba Ljung-Box (lag=365): p-valor = 0 
+## Prueba Ljung-Box (lag=730): p-valor = 0 
+## → ¡Advertencia! Posible autocorrelación estacional en residuales (lag=365).
+\end{verbatim}
+
+\section{Selección del modelo}\label{selecciuxf3n-del-modelo}
+
+Para la selección del mejor modelo se procede a evaluar la habilidad
+predictiva de cada modelo para un año, para evaluar cual capta de mejor
+manera el comportacmiento a futuro y en particular como predice la
+estacionalidad.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Definir conjunto de entrenamiento (excluyendo el último año)}
+\NormalTok{train\_end }\OtherTok{\textless{}{-}} \FunctionTok{length}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{) }\SpecialCharTok{{-}} \DecValTok{365}
+\NormalTok{l.PM2}\FloatTok{.5}\NormalTok{\_train }\OtherTok{\textless{}{-}} \FunctionTok{window}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{end =} \FunctionTok{time}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{)[train\_end])}
+\NormalTok{l.PM2}\FloatTok{.5}\NormalTok{\_test }\OtherTok{\textless{}{-}} \FunctionTok{window}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{, }\AttributeTok{start =} \FunctionTok{time}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{)[train\_end }\SpecialCharTok{+} \DecValTok{1}\NormalTok{])}
+
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Período de entrenamiento:"}\NormalTok{, }\FunctionTok{start}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{\_train), }\StringTok{"a"}\NormalTok{, }\FunctionTok{end}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{\_train), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Período de entrenamiento: 2015 1 a 2019 12
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Período de prueba:"}\NormalTok{, }\FunctionTok{start}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{\_test), }\StringTok{"a"}\NormalTok{, }\FunctionTok{end}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{\_test), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Período de prueba: 2019 13 a 2020 12
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Observaciones en prueba:"}\NormalTok{, }\FunctionTok{length}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{\_test), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Observaciones en prueba: 365
+\end{verbatim}
+
+\subsection{\texorpdfstring{Modelo
+\(ARMA(2,2)\)}{Modelo ARMA(2,2)}}\label{modelo-arma22-2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{arma2}\FloatTok{.2}\NormalTok{\_train }\OtherTok{\textless{}{-}} \FunctionTok{arima}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{\_train, }\AttributeTok{order =} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in arima(l.PM2.5_train, order = c(2, 0, 2)): possible convergence
+## problem: optim gave code = 1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"ARMA(2,2) re{-}estimado {-} AIC:"}\NormalTok{, arma2}\FloatTok{.2}\NormalTok{\_train}\SpecialCharTok{$}\NormalTok{aic, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## ARMA(2,2) re-estimado - AIC: 379.1497
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Pronóstico ARMA(2,2)}
+\NormalTok{forecast\_arma }\OtherTok{\textless{}{-}} \FunctionTok{forecast}\NormalTok{(arma2}\FloatTok{.2}\NormalTok{\_train, }\AttributeTok{h =} \DecValTok{365}\NormalTok{)}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Pronóstico ARMA(2,2) {-} generado}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Pronóstico ARMA(2,2) - generado
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Gráfico 1: ARMA vs Observado}
+\FunctionTok{plot}\NormalTok{(forecast\_arma, }\AttributeTok{main =} \StringTok{"Pronóstico ARMA(2,2) vs Observado {-} Último Año"}\NormalTok{,}
+     \AttributeTok{ylab =} \StringTok{"log(PM2.5)"}\NormalTok{, }\AttributeTok{xlab =} \StringTok{"Tiempo"}\NormalTok{)}
+\FunctionTok{lines}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{\_test, }\AttributeTok{col =} \StringTok{"red"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.25}\NormalTok{)}
+\FunctionTok{legend}\NormalTok{(}\StringTok{"topleft"}\NormalTok{, }\AttributeTok{legend =} \FunctionTok{c}\NormalTok{(}\StringTok{"Pronóstico"}\NormalTok{, }\StringTok{"Intervalo 80\%"}\NormalTok{, }\StringTok{"Intervalo 95\%"}\NormalTok{, }\StringTok{"Observado"}\NormalTok{),}
+       \AttributeTok{col =} \FunctionTok{c}\NormalTok{(}\StringTok{"blue"}\NormalTok{, }\StringTok{"lightblue"}\NormalTok{, }\StringTok{"lightgray"}\NormalTok{, }\StringTok{"red"}\NormalTok{), }\AttributeTok{lty =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{), }\AttributeTok{lwd =} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{2}\NormalTok{), }\AttributeTok{cex =} \FloatTok{0.8}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-31-1.pdf}
+
+\subsection{Modelo SARIMA}\label{modelo-sarima}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sarima\_auto\_train }\OtherTok{\textless{}{-}} \FunctionTok{auto.arima}\NormalTok{(}
+\NormalTok{  l.PM2}\FloatTok{.5}\NormalTok{\_train,}
+  \AttributeTok{d =} \DecValTok{0}\NormalTok{,}
+  \AttributeTok{D =} \DecValTok{1}\NormalTok{,}
+  \AttributeTok{max.p =} \DecValTok{1}\NormalTok{, }\AttributeTok{max.q =} \DecValTok{2}\NormalTok{,}
+  \AttributeTok{max.P =} \DecValTok{0}\NormalTok{, }\AttributeTok{max.Q =} \DecValTok{0}\NormalTok{,}
+  \AttributeTok{seasonal =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{stepwise =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{approximation =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{trace =} \ConstantTok{FALSE}
+\NormalTok{)}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"SARIMA auto re{-}estimado {-} Especificación:"}\NormalTok{, }\FunctionTok{arimaorder}\NormalTok{(sarima\_auto\_train), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## SARIMA auto re-estimado - Especificación: 1 0 2 0 1 0 365
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"SARIMA auto re{-}estimado {-} AIC:"}\NormalTok{, sarima\_auto\_train}\SpecialCharTok{$}\NormalTok{aic, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## SARIMA auto re-estimado - AIC: 934.6266
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Pronóstico SARIMA auto}
+\NormalTok{forecast\_sarima\_auto }\OtherTok{\textless{}{-}} \FunctionTok{forecast}\NormalTok{(sarima\_auto\_train, }\AttributeTok{h =} \DecValTok{365}\NormalTok{)}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Pronóstico SARIMA auto {-} generado}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Pronóstico SARIMA auto - generado
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Gráfico 2: SARIMA Auto vs Observado}
+\FunctionTok{plot}\NormalTok{(forecast\_sarima\_auto, }\AttributeTok{main =} \StringTok{"Pronóstico SARIMA Auto vs Observado {-} Último Año"}\NormalTok{,}
+     \AttributeTok{ylab =} \StringTok{"log(PM2.5)"}\NormalTok{, }\AttributeTok{xlab =} \StringTok{"Tiempo"}\NormalTok{)}
+\FunctionTok{lines}\NormalTok{(l.PM2}\FloatTok{.5}\NormalTok{\_test, }\AttributeTok{col =} \StringTok{"red"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{1.5}\NormalTok{)}
+\FunctionTok{legend}\NormalTok{(}\StringTok{"topleft"}\NormalTok{, }\AttributeTok{legend =} \FunctionTok{c}\NormalTok{(}\StringTok{"Pronóstico"}\NormalTok{, }\StringTok{"Intervalo 80\%"}\NormalTok{, }\StringTok{"Intervalo 95\%"}\NormalTok{, }\StringTok{"Observado"}\NormalTok{),}
+       \AttributeTok{col =} \FunctionTok{c}\NormalTok{(}\StringTok{"blue"}\NormalTok{, }\StringTok{"lightblue"}\NormalTok{, }\StringTok{"lightgray"}\NormalTok{, }\StringTok{"red"}\NormalTok{), }\AttributeTok{lty =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{), }\AttributeTok{lwd =} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{1}\NormalTok{), }\AttributeTok{cex =} \FloatTok{0.8}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-34-1.pdf}
+
+\subsection{Comparación de modelos}\label{comparaciuxf3n-de-modelos}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Función para calcular métricas de error}
+\NormalTok{calculate\_forecast\_metrics }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(forecast\_obj, actual) \{}
+\NormalTok{  pred }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(forecast\_obj}\SpecialCharTok{$}\NormalTok{mean)}
+\NormalTok{  errors }\OtherTok{\textless{}{-}}\NormalTok{ actual }\SpecialCharTok{{-}}\NormalTok{ pred}
+  
+\NormalTok{  metrics }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+    \AttributeTok{RMSE =} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{mean}\NormalTok{(errors}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)),}
+    \AttributeTok{MAE =} \FunctionTok{mean}\NormalTok{(}\FunctionTok{abs}\NormalTok{(errors), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{MAPE =} \FunctionTok{mean}\NormalTok{(}\FunctionTok{abs}\NormalTok{(errors}\SpecialCharTok{/}\NormalTok{actual) }\SpecialCharTok{*} \DecValTok{100}\NormalTok{, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{MASE =} \FunctionTok{mean}\NormalTok{(}\FunctionTok{abs}\NormalTok{(errors)) }\SpecialCharTok{/} \FunctionTok{mean}\NormalTok{(}\FunctionTok{abs}\NormalTok{(}\FunctionTok{diff}\NormalTok{(actual, }\AttributeTok{lag =} \DecValTok{365}\NormalTok{)), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{  )}
+  \FunctionTok{return}\NormalTok{(metrics)}
+\NormalTok{\}}
+
+\CommentTok{\# Calcular métricas para cada modelo}
+\NormalTok{metrics\_arma }\OtherTok{\textless{}{-}} \FunctionTok{calculate\_forecast\_metrics}\NormalTok{(forecast\_arma, l.PM2}\FloatTok{.5}\NormalTok{\_test)}
+\NormalTok{metrics\_sarima\_auto }\OtherTok{\textless{}{-}} \FunctionTok{calculate\_forecast\_metrics}\NormalTok{(forecast\_sarima\_auto, l.PM2}\FloatTok{.5}\NormalTok{\_test)}
+
+\CommentTok{\# Crear tabla comparativa}
+\NormalTok{forecast\_comparison }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{Modelo =} \FunctionTok{c}\NormalTok{(}\StringTok{"ARMA(2,2)"}\NormalTok{, }\StringTok{"SARIMA Auto"}\NormalTok{),}
+  \AttributeTok{RMSE =} \FunctionTok{c}\NormalTok{(metrics\_arma[}\StringTok{"RMSE"}\NormalTok{], metrics\_sarima\_auto[}\StringTok{"RMSE"}\NormalTok{]),}
+  \AttributeTok{MAE =} \FunctionTok{c}\NormalTok{(metrics\_arma[}\StringTok{"MAE"}\NormalTok{], metrics\_sarima\_auto[}\StringTok{"MAE"}\NormalTok{]),}
+  \AttributeTok{MAPE =} \FunctionTok{c}\NormalTok{(metrics\_arma[}\StringTok{"MAPE"}\NormalTok{], metrics\_sarima\_auto[}\StringTok{"MAPE"}\NormalTok{])}
+\NormalTok{)}
+
+\CommentTok{\# Mostrar tabla comparativa}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+\NormalTok{  forecast\_comparison,}
+  \AttributeTok{caption =} \StringTok{"Comparación de métricas de error en pronóstico out{-}of{-}sample (1 año)"}\NormalTok{,}
+  \AttributeTok{digits =} \DecValTok{4}\NormalTok{,}
+  \AttributeTok{row.names =} \ConstantTok{FALSE}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}lrrr@{}}
+\caption{Comparación de métricas de error en pronóstico out-of-sample (1
+año)}\tabularnewline
+\toprule\noalign{}
+Modelo & RMSE & MAE & MAPE \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Modelo & RMSE & MAE & MAPE \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+ARMA(2,2) & 0.8402 & 0.7091 & 17.8447 \\
+SARIMA Auto & 0.5199 & 0.4039 & 9.8157 \\
+\end{longtable}
+
+Todas las métricas son muy diferentes entre los dos modelos y claramente
+el modelo SARIMA supera en habilidad predictiva al modelo ARIMA. Dado
+que el objetivo de este trabajo es determinar el mejor modelo para
+pronóstico de la undefined \(SARIMA(1,0,2)\times(0,1,0)_{365}.\)
+
+\end{document}
