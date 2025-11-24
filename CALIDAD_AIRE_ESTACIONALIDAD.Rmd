@@ -695,32 +695,90 @@ upper80 <- exp(forecast_log$upper[,1])
 lower95 <- exp(forecast_log$lower[,2])
 upper95 <- exp(forecast_log$upper[,2])
 
-# --- 3. Gráfica en escala original ---
-plot(forecast_log, main = "Pronóstico de PM2.5 (Escala original)",
-     ylab = "PM2.5 (µg/m³)", xlab = "Tiempo")
 
-lines(forecast_PM25, col = "blue", lwd = 2)
-lines(lower80, col = "lightblue", lwd = 2)
-lines(upper80, col = "lightblue", lwd = 2)
-lines(lower95, col = "gray", lwd = 2)
-lines(upper95, col = "gray", lwd = 2)
 
-legend("topleft",
-       legend = c("Pronóstico", "80% intervalo", "95% intervalo"),
-       col = c("blue", "lightblue", "gray"),
-       lty = 1, lwd = 2, cex = 0.8)
+start_future <- as.Date("2020-12-07")
+fechas_future <- seq(start_future, by = "day", length.out = 365)
+
+df_pred <- data.frame(
+  Fecha = fechas_future,
+  Pronostico = as.numeric(forecast_PM25),
+  Lower80 = as.numeric(lower80),
+  Upper80 = as.numeric(upper80),
+  Lower95 = as.numeric(lower95),
+  Upper95 = as.numeric(upper95)
+)
+
+ggplot(df_pred, aes(x = Fecha)) +
+  geom_ribbon(aes(ymin = Lower95, ymax = Upper95),
+              fill = "gray80", alpha = 0.5) +
+  geom_ribbon(aes(ymin = Lower80, ymax = Upper80),
+              fill = "#4A90E2" , alpha = 0.6) +
+  geom_line(aes(y = Pronostico), color = "blue", linewidth = 1.1) +
+  labs(
+    title = "Pronóstico de PM2.5 en Delhi (dic 2020 – dic 2021)",
+    subtitle = "Modelo SARIMA(1,0,2)(0,1,0)[365]",
+    x = "Fecha",
+    y = "PM2.5 (µg/m³)"
+  ) +
+  theme_minimal()
 
 ```
 
-El pronóstico generado a partir del modelo  $SARIMA(1,0,2)\times(0,1,0)_{365}.$ permite estimar la evolución futura de los niveles de PM2.5 para un año. Los valores pronosticados se presentan en escala original (µg/m³) para facilitar su interpretación.
 
-El patrón proyectado mantiene la estacionalidad anual observada, se espera un incremento significativo en los niveles de PM2.5 entre noviembre y enero, alcanzando valores promedio cercanos a 150–180 µg/m³, con intervalos de pronóstico al 95% que llegan hasta los 220–250 µg/m³. Estos niveles corresponden a categorías de contaminación “Muy Mala” o “Peligrosa”, según estándares internacionales.
+```{r}
 
-Durante los meses de junio, julio y agosto, el modelo prevé una marcada disminución de PM2.5, situándose alrededor de 70–90 µg/m³, consistente con la temporada de monzones en Delhi. A partir de septiembre y octubre, se observa nuevamente un ascenso pronunciado, señalando el comienzo del nuevo ciclo invernal y la reaparición de condiciones atmosféricas adversas.
+library(ggplot2)
+library(dplyr)
 
-Los intervalos de pronóstico muestran una mayor amplitud en los meses de máxima contaminación, reflejando la alta variabilidad presente en los episodios extremos de PM2.5. A pesar de ello, la dinámica general proyectada es coherente con el comportamiento histórico, lo que respalda la capacidad del modelo para capturar adecuadamente la estacionalidad y los picos de contaminación característicos de la ciudad.
+# --- 1. Datos reales (2019–2021) ---
+df_real_zoom <- aire %>%
+  filter(Date >= as.Date("2019-01-01")) %>%
+  select(Date, PM2.5)
+
+# --- 2. Datos predichos (df_pred ya existe) ---
+df_pred_zoom <- df_pred
+
+# --- 3. Gráfico combinado CORREGIDO ---
+ggplot() +
+  geom_line(data = df_real_zoom,
+            aes(x = Date, y = PM2.5),
+            color = "gray70", alpha = 0.5, linewidth = 0.4) +
+  
+  geom_ribbon(data = df_pred_zoom,
+              aes(x = Fecha, ymin = Lower95, ymax = Upper95),
+              fill = "gray80", alpha = 0.4) +
+  
+  geom_ribbon(data = df_pred_zoom,
+              aes(x = Fecha, ymin = Lower80, ymax = Upper80),
+              fill = "#4A90E2", alpha = 0.35) +
+  
+  geom_line(data = df_pred_zoom,
+            aes(x = Fecha, y = Pronostico),
+            color = "#003f8c", linewidth = 1.2) +
+  
+  labs(
+    title = "PM2.5 observado y pronosticado (Zoom 2019–2021)",
+    subtitle = "Datos reales (gris) y pronóstico SARIMA (azul)",
+    x = "Fecha",
+    y = "PM2.5 (µg/m³)"
+  ) +
+  theme_minimal()
 
 
+```
 
+
+El pronóstico generado a partir del modelo  $SARIMA(1,0,2)\times(0,1,0)_{365}$ permite estimar la evolución futura de los niveles de PM2.5 para un año. Los valores pronosticados se presentan en escala original (µg/m³) para facilitar su interpretación.
+
+En la serie pronosticada se conserva el patrón estacional característico de la contaminación atmosférica en Delhi. El modelo anticipa valores elevados durante los meses invernales (especialmente diciembre, enero y noviembre), con promedios diarios que oscilan entre 150 y 300 µg/m³, e incluso con picos más altos según los intervalos de confianza. Este comportamiento coincide con la época del año en la que se presentan condiciones meteorológicas adversas, mayor uso de combustibles y episodios de quema agrícola en estados cercanos.
+
+Durante los meses comprendidos entre marzo y junio, el pronóstico muestra una disminución gradual de los niveles de PM2.5, con valores generalmente menores a 100 µg/m³. Posteriormente, en los meses de julio y agosto, el modelo proyecta los niveles más bajos del ciclo anual (entre 60 y 90 µg/m³), lo cual es coherente con la temporada de monzones, donde las lluvias intensas contribuyen a la remoción de partículas en suspensión.
+
+A partir de septiembre, se observa un incremento progresivo en los valores pronosticados, el cual se intensifica de manera marcada en octubre y noviembre, reproduciendo el inicio de un nuevo ciclo de alta contaminación. Este comportamiento refleja la fuerte estacionalidad anual del fenómeno y confirma que el modelo captura de manera adecuada la dinámica histórica de la serie.
+
+Los intervalos de pronóstico del 80% y 95% muestran una mayor amplitud en los meses con niveles más altos de contaminación, reflejando la elevada variabilidad y la presencia de episodios extremos típicos del invierno y del periodo post-monzónico. En contraste, durante la época de lluvias los intervalos son más estrechos, indicando mayor estabilidad y menor incertidumbre en los valores esperados.
+
+En conjunto, el pronóstico obtenido es consistente con los patrones observados en años anteriores y ofrece una estimación realista del comportamiento futuro del PM2.5 en Delhi, manteniendo las características de estacionalidad, variabilidad y picos extremos que definen la calidad del aire en la ciudad.
 
 
