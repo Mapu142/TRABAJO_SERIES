@@ -34,6 +34,7 @@ library(ggplot2) # para gráficas
 library(lubridate) # fechas
 library(zoo) #imputación de datos faltantes
 library(nortest) # para prueba kolmogorov
+library(dlm) # para modelo estructural
 ```
 # Descripción de los datos:
 
@@ -212,5 +213,58 @@ Ademas al evaluar los residuales reflejan un comportamiento aleatorio, luego la 
 # Descomposición STL 
 plot(stl(l.PM2.5, s.window = "periodic"), col = "darkcyan", lwd = 1.25)
 ```
+```{r}
+Ft = matrix(c(1,1,rep(0,363)), nrow = 1)
+Gt <- matrix(0, nrow = 365, ncol = 365)
 
+## Nivel
+Gt[1, 1] <- 1
+
+## Corrimiento estacional
+# s_t -> s_{t+1}, s_{t+1} -> s_{t+2}, ...
+for (i in 2:(365 - 1)) {
+  Gt[i, i + 1] <- 1
+}
+
+## Restricción estacional (última fila)
+Gt[365, 2:365] <- -1
+mod3.manual <- dlm(FF=Ft, GG=Gt, m0=rep(0,365), C0=1e2*diag(3), V=2, W=diag(rep(0,3)))
+y3.filtro.manual <- dlmFilter(y3, mod3.manual)
+# cbind(y3.filtro$m[,1], y3.filtro.manual$m[,1])
+y3.suave.manual <- dlmSmooth(y3, mod3.manual)
+
+par(mfrow = c(2,1))
+ts.plot(y3, col = "darkgrey")
+lines(dropFirst(y3.filtro.manual$m)[,1], lty = "longdash", col = 2)
+ts.plot(S_t)
+
+par(mfrow = c(2,1))
+ts.plot(y3, col = "darkgrey")
+lines(dropFirst(y3.suave.manual$s)[,1], lty = "longdash", col = 3)
+ts.plot(S_t)
+
+par(mfrow = c(1,1))
+ts.plot(y3, col = "darkgrey")
+lines(dropFirst(y3.filtro.manual$m)[,1], lty = "longdash", col = 2)
+lines(dropFirst(y3.suave.manual$s)[,1], lty = "longdash", col = 3)
+
+par(mfrow = c(1,1))
+ts.plot(y3, col = "darkgrey")
+lines(dropFirst(y3.filtro.manual$m)[,1], lty = "longdash", col = 2)
+lines(S_t, lty = "longdash", col = "blue")
+
+par(mfrow = c(1,1))
+ts.plot(y3, col = "darkgrey")
+lines(dropFirst(y3.suave.manual$s)[,1], lty = "longdash", col = 3)
+lines(S_t, lty = "longdash", col = "blue")
+
+cbind(S_t, dropFirst(y3.filtro.manual$m)[,1], dropFirst(y3.suave.manual$s)[,1])
+
+par(mfrow = c(2,1))
+ts.plot(S_t, col = "darkgrey")
+lines(dropFirst(y3.filtro.manual$m)[,1], lty = "longdash", col = 2)
+
+ts.plot(S_t, col = "darkgrey")
+lines(dropFirst(y3.suave.manual$s)[,1], lty = "longdash", col = 3)
+```
 
