@@ -1,13 +1,15 @@
 ---
 title: "CALIDAD_AIRE_ESTACIONALIDAD"
 author:
-  - María Paula Camargo Rincón
-  - Laura Katherin Martinez Castiblanco
-  - Yudy Vanessa Puerres Rosero
+- María Paula Camargo Rincón
+- Laura Katherin Martinez Castiblanco
+- Yudy Vanessa Puerres Rosero
 date: "2025-11-21"
-output: pdf_document
-editor_options: 
-  markdown: 
+output:
+  html_document:
+    df_print: paged
+editor_options:
+  markdown:
     wrap: sentence
 ---
 
@@ -126,6 +128,92 @@ summary_stats <- aire %>%
 
 kable(summary_stats, digits = 3, caption = "Estadísticas descriptivas de PM2.5 ")
 ```
+
+```{r}
+library(ggplot2)
+
+ggplot(aire, aes(x = Date, y = PM2.5)) +
+  geom_line(color = "steelblue") +
+  labs(title = "Serie temporal PM2.5 en Delhi (2015–2020)",
+       x = "Fecha", y = "PM2.5 (µg/m³)") +
+  theme_minimal()
+
+```
+
+La figura anterior muestra la evolución diaria de los niveles de PM2.5 en Delhi entre enero de 2015 y diciembre de 2020.
+Se observa un comportamiento altamente variable, con episodios extremos que superan los 600 µg/m³ e intervalos de disminución temporal, especialmente en algunos meses.
+
+A partir de la visualización se destacan cuatro características importantes:
+
+La serie no presenta una tendencia claramente creciente o decreciente a largo plazo; sin embargo, sí muestra ciclos de aumento y descenso que se repiten cada año.
+Se observa una ligera reducción global de la variabilidad, probablemente asociada a medidas de control ambiental o al periodo de confinamiento por COVID-19.
+
+Los valores de PM2.5 fluctúan intensamente, hay episodios extremos \> 500 µg/m³ pero tambien días con valores relativamente bajos \< 50 µg/m³.
+Esto justifica el uso de modelos ARIMA/SARIMA, ya que la serie muestra fuerte autocorrelación e irregularidad típica de fenómenos atmosféricos.
+
+```{r}
+
+pm_mensual <- aire %>%
+  mutate(mes = format(Date, "%m")) %>%
+  group_by(mes) %>%
+  summarise(promedio = mean(PM2.5))
+
+pm_mensual
+
+```
+
+```{r}
+
+pm_mensual$mes <- factor(pm_mensual$mes, levels = sprintf("%02d", 1:12))
+
+ggplot(pm_mensual, aes(x = mes, y = promedio, group = 1)) +
+  geom_line(color = "blue") +
+  geom_point(size = 2) +
+  labs(
+    title = "Promedio mensual de PM2.5 (2015–2020)",
+    x = "Mes",
+    y = "PM2.5 promedio (µg/m³)"
+  ) +
+  theme_minimal()
+
+```
+
+La gráfica anterior muestra el comportamiento promedio mensual del PM2.5 en Delhi durante el periodo 2015–2020.
+Se observa una estacionalidad anual muy marcada, con niveles de contaminación que aumentan y disminuyen siguiendo un patrón consistente cada año.
+
+En primer lugar, se identifican valores considerablemente elevados en los meses de diciembre (≈ 173 µg/m³), enero (≈ 162 µg/m³) y noviembre (≈ 160 µg/m³).
+Este comportamiento está asociado a condiciones meteorológicas adversas como la inversión térmica, la baja dispersión atmosférica, el aumento en el uso de combustibles y episodios estacionales de contaminación, como la quema de residuos agrícolas y la celebración de Diwali.
+
+Durante la transición hacia el verano, entre los meses de marzo y mayo, se observa una disminución progresiva de los niveles de PM2.5 (alrededor de 100–105 µg/m³), aunque estos aún se mantienen por encima de los estándares recomendados.
+
+Los valores más bajos se presentan entre junio y agosto (≈ 75–90 µg/m³), coincidiendo con la llegada de la temporada de monzones, caracterizada por lluvias intensas que reducen significativamente la concentración de partículas en suspensión.
+Posteriormente, en septiembre inicia un ascenso gradual que se intensifica en octubre, mes en el cual los niveles aumentan de forma abrupta (≈ 150 µg/m³), marcando el inicio del nuevo ciclo de contaminación invernal. En conjunto, la gráfica evidencia un ciclo estacional anual fuerte.
+
+```{r}
+aire$mes <- factor(format(aire$Date, "%m"), levels = sprintf("%02d", 1:12))
+
+ggplot(aire, aes(x = mes, y = PM2.5)) +
+  geom_boxplot(fill =  "darkcyan", color = "darkblue") +
+  labs(
+    title = "Distribución mensual de PM2.5 (2015–2020)",
+    x = "Mes",
+    y = "PM2.5 (µg/m³)"
+  ) +
+  theme_minimal()
+
+
+```
+
+La figura correspondiente al boxplot mensual permite analizar la variabilidad de los niveles diarios de PM2.5 dentro de cada mes del año.
+En términos generales, se identifica un patrón estacional coherente con lo observado en la gráfica del promedio mensual, pero ahora con mayor detalle sobre la dispersión y los valores atípicos.
+
+En enero, noviembre y diciembre se observan las cajas más altas y amplias, lo cual indica que en estos meses no solo aumentan los niveles promedio de PM2.5, sino que además la dispersión es considerablemente mayor, esto sugiere una mayor frecuencia de episodios extremos de contaminación durante el invierno, consistente con condiciones de inversión térmica y aumentos en emisiones, estos meses presentan también numerosos valores atípicos, muchos por encima de los 300–400 µg/m³, reflejando eventos altamente contaminados.
+
+Durante los meses de junio a agosto, correspondientes a la temporada de monzones, las cajas se ubican en niveles mucho más bajos (≈ 70–100 µg/m³), y la dispersión es menor en comparación con los meses de invierno, los outliers son menos frecuentes y menos extremos, lo que confirma que la lluvia y la humedad reducen la presencia de partículas en suspensión.
+
+Los meses de marzo a mayo presentan una dispersión intermedia y medianas alrededor de los 100–120 µg/m³, representando una fase de transición entre los niveles mínimos del monzón y los máximos del invierno.
+
+Finalmente, en octubre se observa un incremento abrupto tanto en la mediana como en la pendiente superior de la caja, lo cual coincide con el final del monzón y el inicio del periodo de emisiones por quema agrícola. Esto confirma la naturaleza progresiva del aumento de PM2.5 previo al invierno.
 
 # Identificación de modelos
 
@@ -291,7 +379,7 @@ En conjunto, estos resultados validan que la serie transformada y diferenciada e
 # Estimación del modelo
 
 Se procedió a ajustar dos modelos candidatos: un modelo $ARMA(2,2)$ y un $SARIMA(2,0,2)\times (0,1,0)_{365}$ .Sin embargo, dadas las limitaciones computacionales asociadas con la especificación $SARIMA(2,0,2) \times (0,1,0)_{365}$, especialmente por la alta dimensionalidad del operador estacional (periodo = $365$), se optó por emplear la función `auto.arima()` con restricciones que mantuvieran la estructura no estacional dentro del rango propuesto (hasta orden 2 en $AR$ y $MA$) y fijaran el componente estacional a $(0,1,0)$.
-Adicionalmente, mas adelante se cmprueba que estos dos modelos SARIMA se comportan de similar manera, luego es preferible trabajar con el modelo de menor costo computacional.
+Adicionalmente, mas adelante se comprueba que estos dos modelos SARIMA se comportan de similar manera, luego es preferible trabajar con el modelo de menor costo computacional.
 
 ```{r}
 arma2.2 <- arima(x = l.PM2.5, order = c(2,0,2))
@@ -449,7 +537,7 @@ Al evaluar los residuales no se encuentran patrones evidentes ni cambios en la v
 El histograma muestra una distribución simétrica y centrada en cero, mientras que el gráfico Q-Q confirma una buena aproximación a la normalidad, especialmente en las colas intermedias.
 
 La función de autocorrelación parcial (PACF) de los residuales no presenta picos significativos en los primeros rezagos, lo cual sugiere ausencia de dependencia temporal local.
-Además, la prueba de Ljung-Box aplicada en múltiplos del período estacional (lag = 365 y lag = 730) arroja p-valores superiores a 0.05 (p = 0.1211 y p = 0.0201, respectivamente), lo que indica ausencia de autocorrelación estacional significativa en los residuales. 
+Además, la prueba de Ljung-Box aplicada en múltiplos del período estacional (lag = 365 y lag = 730) arroja p-valores superiores a 0.05 (p = 0.1211 y p = 0.0201, respectivamente), lo que indica ausencia de autocorrelación estacional significativa en los residuales.
 
 ```{r fig.height=4, fig.width=10, paged.print=FALSE}
 
@@ -583,3 +671,56 @@ knitr::kable(
 
 Todas las métricas son muy diferentes entre los dos modelos y claramente el modelo SARIMA supera en habilidad predictiva al modelo ARIMA.
 Dado que el objetivo de este trabajo es determinar el mejor modelo para pronóstico de la undefined $SARIMA(1,0,2)\times(0,1,0)_{365}.$
+
+
+
+# Pronóstico
+
+El pronóstico corresponde al periodo comprendido entre el 7 de diciembre de 2020 y el 6 de diciembre de 2021.
+
+```{r}
+library(forecast)
+
+# --- 1. Pronóstico en escala log ---
+forecast_log <- forecast(sarima_auto, h = 365)
+
+# --- 2. Convertir el pronóstico a escala original PM2.5 ---
+# media pronosticada
+forecast_PM25 <- exp(forecast_log$mean)
+
+# intervalos 80% y 95%
+lower80 <- exp(forecast_log$lower[,1])
+upper80 <- exp(forecast_log$upper[,1])
+
+lower95 <- exp(forecast_log$lower[,2])
+upper95 <- exp(forecast_log$upper[,2])
+
+# --- 3. Gráfica en escala original ---
+plot(forecast_log, main = "Pronóstico de PM2.5 (Escala original)",
+     ylab = "PM2.5 (µg/m³)", xlab = "Tiempo")
+
+lines(forecast_PM25, col = "blue", lwd = 2)
+lines(lower80, col = "lightblue", lwd = 2)
+lines(upper80, col = "lightblue", lwd = 2)
+lines(lower95, col = "gray", lwd = 2)
+lines(upper95, col = "gray", lwd = 2)
+
+legend("topleft",
+       legend = c("Pronóstico", "80% intervalo", "95% intervalo"),
+       col = c("blue", "lightblue", "gray"),
+       lty = 1, lwd = 2, cex = 0.8)
+
+```
+
+El pronóstico generado a partir del modelo  $SARIMA(1,0,2)\times(0,1,0)_{365}.$ permite estimar la evolución futura de los niveles de PM2.5 para un año. Los valores pronosticados se presentan en escala original (µg/m³) para facilitar su interpretación.
+
+El patrón proyectado mantiene la estacionalidad anual observada, se espera un incremento significativo en los niveles de PM2.5 entre noviembre y enero, alcanzando valores promedio cercanos a 150–180 µg/m³, con intervalos de pronóstico al 95% que llegan hasta los 220–250 µg/m³. Estos niveles corresponden a categorías de contaminación “Muy Mala” o “Peligrosa”, según estándares internacionales.
+
+Durante los meses de junio, julio y agosto, el modelo prevé una marcada disminución de PM2.5, situándose alrededor de 70–90 µg/m³, consistente con la temporada de monzones en Delhi. A partir de septiembre y octubre, se observa nuevamente un ascenso pronunciado, señalando el comienzo del nuevo ciclo invernal y la reaparición de condiciones atmosféricas adversas.
+
+Los intervalos de pronóstico muestran una mayor amplitud en los meses de máxima contaminación, reflejando la alta variabilidad presente en los episodios extremos de PM2.5. A pesar de ello, la dinámica general proyectada es coherente con el comportamiento histórico, lo que respalda la capacidad del modelo para capturar adecuadamente la estacionalidad y los picos de contaminación característicos de la ciudad.
+
+
+
+
+
