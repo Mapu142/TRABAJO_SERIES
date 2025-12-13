@@ -550,7 +550,7 @@ check_whiteness(arma2.2, "ARMA(2,2)")
 En este caso es mas evidente que ambos modelos son equivalentes en sus desempeños.
 Se tiene un Q-Q plot aceptable a excepción por la concentración en la media dada por la aparente autocorrelación.
 
-La prueba de Ljung-Box aplicada al rezago 365 arroja un p-valor nulo (p ≈ 0), lo que implica evidencia estadísticamente significativa de autocorrelación estacional en los residuales.
+La prueba de Ljung-Box aplicada al rezago 365 arroja un p-valor nulo (p $\approx$ 0), lo que implica evidencia estadísticamente significativa de autocorrelación estacional en los residuales.
 Esto a pesar de incluir parte estacional en el modelo.
 
 ```{r fig.height=4, fig.width=10}
