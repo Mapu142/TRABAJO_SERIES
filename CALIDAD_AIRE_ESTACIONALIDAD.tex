@@ -89,24 +89,23 @@
 \makesavenoteenv{longtable}
 \usepackage{graphicx}
 \makeatletter
-\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
-\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
-\makeatother
-% Scale images if necessary, so that they will not overflow the page
-% margins by default, and it is still possible to overwrite the defaults
-% using explicit options in \includegraphics[width, height, ...]{}
-\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
 % Set default figure placement to htbp
-\makeatletter
 \def\fps@figure{htbp}
 \makeatother
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
-\ifLuaTeX
-  \usepackage{selnolig}  % disable illegal ligatures
-\fi
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
@@ -402,7 +401,7 @@ sugiere heterocedasticidad.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-8-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-8-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -418,7 +417,7 @@ sugiere heterocedasticidad.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-9-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-9-1.pdf}}
 
 Podemos ver picos altos en los lag \(0\), \(1\) y \(2\) en el ACF, los
 cuales son decrecientes y hacen referencia a la estacionalidad anual, es
@@ -465,7 +464,7 @@ periodo de pandemia.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-11-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-11-1.pdf}}
 
 Dada la heterocedasticidad, se evaluo una transformación para
 estabilizar la varianza. Se estimó el parámetro de Box-Cox, obteniéndo
@@ -493,7 +492,7 @@ transformación logarítmica.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-12-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-12-1.pdf}}
 
 La serie transformada presenta una varianza más homogénea y mantiene la
 estacionariedad en media (prueba ADF con p-valor \(\approx\) 0.027), sin
@@ -533,7 +532,7 @@ luego la transformación permite capturar adecuadamente la serie.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-14-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-14-1.pdf}}
 
 Dada la estacionalidad persistente de la serie log-transformada aún no
 puede considerarse estrictamente estacionaria (decaimiento lento del
@@ -549,7 +548,7 @@ incluir una componente estacional al modelo.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-15-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-15-1.pdf}}
 
 Por lo tanto, se plantea un primer modelo con una diferenciación de
 primer orden \((1-B)Z_{t}\) con el fin de eliminar la tendencia presente
@@ -564,7 +563,7 @@ alrededor de una media constante, sin tendencias visibles.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-16-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-16-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -594,7 +593,7 @@ consistente con la presencia de estacionalidad.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-17-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-17-1.pdf}}
 
 El test de Dickey--Fuller Aumentado (ADF) arrojó un estadístico de
 -16.31 con un p-valor \textless{} 0.01, indicando que la serie
@@ -645,7 +644,7 @@ promedio de contaminación tras la remoción de la estacionalidad.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-19-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-19-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -695,7 +694,7 @@ adecuado para capturar la dinámica restante.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-21-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-21-1.pdf}}
 
 En conjunto, estos resultados validan que la serie transformada y
 diferenciada estacionalmente cumple con los supuestos de estacionariedad
@@ -889,11 +888,11 @@ modelos}\label{fuxf3rmulas-estimadas-de-los-modelos}
 \end{Shaded}
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1389}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.3611}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1389}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1528}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2083}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1389}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3611}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1389}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1528}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2083}}@{}}
 \caption{Coeficientes estimados de los modelos}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
@@ -1034,8 +1033,8 @@ significativa en los residuales.~
 ## === Validación de residuales: ARMA(2,2) ===
 \end{verbatim}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-26-1.pdf}
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-26-2.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-26-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-26-2.pdf}}
 
 \begin{verbatim}
 ## 
@@ -1073,8 +1072,8 @@ parte estacional en el modelo.
 ## === Validación de residuales: SARIMA(1,0,2)(0,1,0)[365] ===
 \end{verbatim}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-27-1.pdf}
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-27-2.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-27-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-27-2.pdf}}
 
 \begin{verbatim}
 ## 
@@ -1101,8 +1100,8 @@ parte estacional en el modelo.
 ## === Validación de residuales: SARIMA(2,0,2)(0,1,0)[365] ===
 \end{verbatim}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-27-3.pdf}
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-27-4.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-27-3.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-27-4.pdf}}
 
 \begin{verbatim}
 ## 
@@ -1208,7 +1207,7 @@ estacionalidad.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-31-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-31-1.pdf}}
 
 \subsection{Modelo SARIMA}\label{modelo-sarima}
 
@@ -1266,7 +1265,7 @@ estacionalidad.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-34-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{CALIDAD_AIRE_ESTACIONALIDAD_files/figure-latex/unnamed-chunk-34-1.pdf}}
 
 \subsection{Comparación de modelos}\label{comparaciuxf3n-de-modelos}
 

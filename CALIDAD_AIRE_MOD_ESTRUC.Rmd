@@ -125,3 +125,92 @@ kable(summary_stats, digits = 3, caption = "Estadísticas descriptivas de PM2.5 
 ```
 
 # Identificación de modelos
+La gráfica de la serie de tiempo muestra una variabilidad, con estacionalidad clara (patrones repetidos, que parecieran ser anuales).
+Aunque no se observa una tendencia, la varianza no es constante puesto que los picos son más pronunciados en ciertos períodos del año, lo que sugiere heterocedasticidad.
+
+```{r fig.height=4, fig.width=10}
+# Creación de la serie temporal
+start_date <- min(aire$Date)
+end_date <- max(aire$Date)
+PM2.5 <- ts(aire$`PM2.5`, 
+            start = c(year(start_date), month(start_date), day(start_date)), 
+            end = c(year(end_date), month(end_date), day(end_date)), 
+            frequency = 365)
+PM2.5_zoom <- window(PM2.5, start = c(2016, 1), end = c(2018, 1))
+
+# Configurar dos gráficos en una fila
+par(mfrow = c(1, 2))
+
+# Gráfico completo
+ts.plot(PM2.5, col = "darkcyan", lwd = 1.5,
+        ylab = "PM2.5 promedio diario", xlab = "Tiempo",
+        main = "Serie completa")
+# Gráfico con zoom
+ts.plot(PM2.5_zoom, col = "darkcyan", lwd = 1.5,
+        ylab = "PM2.5 promedio diario", xlab = "Tiempo",
+        main = "Zoom: 2016-2017")
+
+```
+
+```{r fig.height=6.5, fig.width=10}
+# Configurar panel 1x2: izquierda = serie completa, derecha = zoom
+par(mfrow = c(2, 2))
+
+## Panel izquierdo: Serie completa
+acf(PM2.5, lag.max = 800, main = "ACF - 2 años", col = "darkcyan", lwd = 1) # 800 > 2*365 → muestra más de 2 años
+pacf(PM2.5, lag.max = 800, main = "PACF - 2 años", col = "darkcyan", lwd = 1)
+## Panel derecho: Serie con zoom (subconjunto)
+acf(PM2.5, lag.max = 200, main = "ACF - Zoom (1er año)", col = "darkcyan", lwd = 1)   # ajusta lag.max al tamaño del subconjunto
+pacf(PM2.5, lag.max = 50, main = "PACF - Zoom (1/4 de año)", col = "darkcyan", lwd = 1.25)
+```
+Podemos ver picos altos en los lag $0$, $1$ y $2$ en el ACF, los cuales son decrecientes y hacen referencia a la estacionalidad anual, es decir el lag 1 hace referencia al día 365 (1 año), el lag 2 al día 730 (2 años).
+
+Para evaluar formalmente la estacionariedad en media (la cual segun gráficos parece ser estacionaria), se usa la prueba de Dickey-Fuller (ADF).
+El estadístico resultante fue -4.7414 con un p-valor \< 0.01, lo que permite rechazar la hipótesis nula de raíz unitaria.
+Por lo tanto, la serie se considera estacionaria.
+
+```{r}
+adf.test(PM2.5, alternative = "stationary")
+```
+
+Al aplicar la descomposición STL (Seasonal-Trend-Loess) se confirma visualmente lo encontrado anteriormente; El componente estacional exhibe un patrón anual repetitivo, con picos consistentes a finales de año.
+Al evaluar la tendencia de la serie, se evidencia como aumentan la cantidad de PM2.5, la cual se reduce considerablemente en lo que parese el periodo de pandemia.
+
+```{r fig.height=6.5, fig.width=10}
+# Descomposición STL
+plot(stl(PM2.5, s.window = "periodic"), col = "darkcyan", lwd = 1.25)
+```
+
+Dada la heterocedasticidad, se evaluo una transformación para estabilizar la varianza.
+Se estimó el parámetro de Box-Cox, obteniéndo $\lambda$ $\approx$ 0.257, cercano a cero.
+Por lo cual se aplicó la transformación logarítmica.
+
+```{r fig.height=4, fig.width=10}
+lambda <- BoxCox.lambda(PM2.5)
+lambda
+
+# Transformación logarítmica
+l.PM2.5 <- log(PM2.5)
+ts.plot(l.PM2.5, col = "darkcyan", lwd = 1.25,
+        ylab = "log(PM2.5 promedio diario)",
+        main = "Serie transformada logarítmicamente")
+```
+
+La serie transformada presenta una varianza más homogénea y mantiene la estacionariedad en media (prueba ADF con p-valor $\approx$ 0.027), sin embargo, a su vez mantiene la estacionalidad anual.
+
+```{r}
+adf.test(l.PM2.5,alternative = "stationary")
+```
+
+Luego de aplicar la transformación logarítmica a la serie de PM2.5, el test de Dickey–Fuller Aumentado (ADF) arrojó un estadístico de -3.65 con un p-valor de 0.027, lo que indicaría estacionariedad a un nivel de significancia del 5%.
+Sin embargo, la inspección de la función de autocorrelación (ACF) revela un decaimiento lento, señal de persistencia temporal y posible estacionalidad anual.
+
+A su vez se observa en la descomposición STL que la estructura estacional anual persiste con patrones cíclicos bien definidos cada año.
+Ademas al evaluar los residuales reflejan un comportamiento aleatorio, luego la transformación permite capturar adecuadamente la serie.
+
+```{r fig.height=6.5, fig.width=10}
+# Descomposición STL 
+plot(stl(l.PM2.5, s.window = "periodic"), col = "darkcyan", lwd = 1.25)
+```
+
+
