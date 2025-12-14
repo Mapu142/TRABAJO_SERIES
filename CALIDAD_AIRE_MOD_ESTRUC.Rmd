@@ -220,11 +220,11 @@ Ademas al evaluar los residuales reflejan un comportamiento aleatorio, luego la 
 plot(stl(l.PM2.5, s.window = "periodic"), col = "darkcyan", lwd = 1.25)
 ```
 
-# Modelo estructural en espacio–estado
+# Modelo Estructural en Estado Espacio
 
-A partir de la serie diaria de PM2.5 (transformada logarítmicamente si se desea estabilizar la varianza), se plantea un modelo estructural en forma de espacio–estado compuesto por un nivel y un componente estacional anual.
+A partir de la serie diaria de PM2.5, se plantea un modelo estructural en forma de espacio–estado compuesto por un nivel y un componente estacional anual.
 
-## Ecuación de observación
+## Ecuación de Observación
 
 $$
 y_t = \mu_t + s_t + \varepsilon_t, 
@@ -233,7 +233,7 @@ $$
 
 donde $y_t$ representa la serie observada ($y_t=\log(\text{PM2.5}_t)$), $\mu_t$ es el nivel (tendencia de largo plazo), $s_t$ es la componente estacional anual y $\varepsilon_t$ es el error de observación.
 
-## Ecuación de estado (nivel)
+## Ecuación de Estado (nivel)
 
 Se considera un nivel local: $$
 \mu_t = \mu_{t-1} + \eta_t, 
@@ -242,20 +242,26 @@ $$
 
 En caso de asumir nivel determinístico, se fija $W_\mu=0$.
 
-## Ecuación de estado (estacionalidad trigonométrica)
+## Ecuación de Estado (Estacionalidad Trigonométrica)
 
 La estacionalidad anual se modela mediante una representación trigonométrica (Fourier): $$
 s_t = \sum_{k=1}^{q}\left[
 a_k \cos\left(\frac{2\pi k t}{365}\right) +
 b_k \sin\left(\frac{2\pi k t}{365}\right)
 \right]
-$$ donde $q$ es el número de armónicos utilizados para aproximar el ciclo anual.
+$$ donde $q=8$ es el número de armónicos utilizados para aproximar el ciclo anual.
+
+
+
+## Estimación del Modelo Mediante Filtrado y Suavizado de Kalman
+
+A continuación, se estima el modelo estructural en espacio–estado mediante el filtro y el suavizado de Kalman, utilizando el paquete dlm. El filtrado permite obtener estimaciones en tiempo real del estado, mientras que el suavizado utiliza toda la información disponible para estimar de manera más precisa los componentes latentes del modelo.
 
 ```{r fig.height=5, fig.width=10}
 
 y3 <- l.PM2.5
 
-# Modelo optimizado: Nivel local + Estacional trigonométrica (4 armónicos para anual)
+# Modelo optimizado: Nivel local + Estacional trigonométrica (8 armónicos para anual)
 mod_trig <- dlmModPoly(order=1, dV=2, dW=0) +  # Nivel constante (W=0 para determinístico)
             dlmModTrig(s=365, q=8, dV=0, dW=0)  # s=periodo, q=armónicos, varianzas fijas
 
@@ -271,9 +277,41 @@ estacional_filtro <- rowSums(dropFirst(y3_suave$s)[,2:ncol(y3_suave$s)])  # Suma
 
 # Plots comparativos (similar a tu código)
 par(mfrow=c(1,1))
-ts.plot(y3, col="darkgrey", main="Serie vs Nivel + Estacional (Filtro)")
+ts.plot(y3, col="darkgrey", main="Serie vs Nivel + Estacional (Suavizado)")
 lines(nivel_filtro + estacional_filtro, col="red", lty=2)
 ```
+La Figura muestra la serie observada de PM2.5 en escala logarítmica (línea gris) junto con el ajuste obtenido a partir del modelo estructural en espacio–estado (línea roja discontinua), correspondiente a la suma del nivel estimado y la componente estacional anual. Se observa que el modelo logra capturar adecuadamente la dinámica general de la serie, reproduciendo de forma clara el patrón estacional anual caracterizado por picos recurrentes y valles pronunciados. Asimismo, el nivel estimado presenta una evolución suave en el tiempo, lo que sugiere cambios graduales en la concentración promedio de PM2.5. En conjunto, el ajuste indica que el modelo estructural proporciona una representación adecuada de la serie.
+
+
+## Validación del modelo: análisis de residuos del suavizado
+
+
+```{r}
+# Ajuste suavizado (numérico)
+ajuste <- as.numeric(nivel_filtro + estacional_filtro)
+
+# Residuos in-sample (numérico)
+residuos <- as.numeric(y3) - ajuste
+
+# (Opcional) volver a ts para plots bonitos
+residuos_ts <- ts(residuos, start = start(y3), frequency = frequency(y3))
+ajuste_ts   <- ts(ajuste,   start = start(y3), frequency = frequency(y3))
+
+par(mfrow=c(3,2))
+ts.plot(y3, col="darkgrey", main="Serie vs ajuste suavizado")
+lines(ajuste_ts, col="red")
+
+plot(residuos_ts, main="Residuos (in-sample)", ylab="Residuo")
+Acf(residuos_ts, main="ACF residuos")
+hist(residuos, breaks=30, main="Hist residuos", xlab="Residuo")
+qqnorm(residuos); qqline(residuos, col="red")
+
+```
+
+
+
+
+
 
 ```{r fig.height=7, fig.width=10}
 ajuste <- nivel_filtro + estacional_filtro
@@ -296,3 +334,5 @@ Acf(residuos, main = "ACF de residuos")
 hist(residuos, breaks = 30, main = "Distribución de residuos", xlab = "Residuo")
 qqnorm(residuos); qqline(residuos, col = "red")
 ```
+
+
