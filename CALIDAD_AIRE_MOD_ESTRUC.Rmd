@@ -242,24 +242,23 @@ lines(nivel_filtro + estacional_filtro, col="red", lty=2)
 
 
 ```{r fig.height=7, fig.width=10}
+ajuste <- nivel_filtro + estacional_filtro
 # --- 1. Obtener residuos de 1 paso adelante (una-pass) ---
-residuos <- residuals(y3_suave, type = "raw")
-
+residuos <- y3-ajuste
 # --- 2. Gráficos de diagnóstico ---
 par(mfrow = c(3, 2))
 
 # a) Serie original vs ajustado
-ajuste <- nivel_filtro + estacional_filtro
 ts.plot(y3, col = "darkgrey", main = "Serie vs Ajuste")
 lines(ajuste, col = "red")
 
 # b) Residuos en el tiempo
-plot(residuos$res, main = "Residuos del modelo", ylab = "Residuo")
+plot(residuos, main = "Residuos del modelo", ylab = "Residuo")
 
 # c) ACF de residuos
-Acf(residuos$res, main = "ACF de residuos")
+Acf(residuos, main = "ACF de residuos")
 
 # d) Histograma + QQ
-hist(residuos$res, breaks = 30, main = "Distribución de residuos", xlab = "Residuo")
-qqnorm(residuos$res); qqline(residuos$res, col = "red")
+hist(residuos, breaks = 30, main = "Distribución de residuos", xlab = "Residuo")
+qqnorm(residuos); qqline(residuos, col = "red")
 ```
