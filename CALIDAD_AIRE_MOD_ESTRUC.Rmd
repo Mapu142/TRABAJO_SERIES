@@ -286,11 +286,11 @@ estacional_suave <- rowSums(dropFirst(y3_suave$s)[,2:ncol(y3_suave$s)])  # Suma 
 # Plots comparativos (similar a tu código)
 par(mfrow=c(1,2))
 ts.plot(y3, col="darkgrey", main="Serie vs Nivel + Estacional (filtro)")
-lines(nivel_filtro + estacional_filtro, col="red", lty=2)
+lines(nivel_filtro + estacional_filtro, col="darkcyan", lty=2)
 ts.plot(y3, col="darkgrey", main="Serie vs Nivel + Estacional (suavizado)")
-lines(nivel_suave + estacional_suave, col="red", lty=2)
+lines(nivel_suave + estacional_suave, col="darkcyan", lty=2)
 ```
-La Figura muestra la serie observada de PM2.5 en escala logarítmica (línea gris) junto con el ajuste obtenido a partir del modelo estructural en espacio–estado (línea roja discontinua), correspondiente a la suma del nivel estimado y la componente estacional anual, para el método de suaviazdo y para el método de filtrafo. Se observa que el modelo suavizado logra capturar adecuadamente la dinámica general de la serie, reproduciendo de forma clara el patrón estacional anual caracterizado por picos recurrentes y valles pronunciados. Asimismo, el nivel estimado presenta una evolución suave en el tiempo, lo que sugiere cambios graduales en la concentración promedio de PM2.5. En conjunto, el ajuste indica que el modelo estructural proporciona una representación adecuada de la serie.
+La Figura muestra la serie observada de PM2.5 en escala logarítmica (línea gris) junto con el ajuste obtenido a partir del modelo estructural en espacio–estado (línea azul discontinua), correspondiente a la suma del nivel estimado y la componente estacional anual, para el método de suaviazdo y para el método de filtrafo. Se observa que el modelo suavizado logra capturar adecuadamente la dinámica general de la serie, reproduciendo de forma clara el patrón estacional anual caracterizado por picos recurrentes y valles pronunciados. Asimismo, el nivel estimado presenta una evolución suave en el tiempo, lo que sugiere cambios graduales en la concentración promedio de PM2.5. En conjunto, el ajuste indica que el modelo estructural proporciona una representación adecuada de la serie.
 
 Por otro lado el modelo filtrado durante el primer año se observa un comportamiento más inestable, asociado al proceso de inicialización del filtro de Kalman. A partir de este período transitorio, el ajuste filtrado converge y presenta un comportamiento similar al del suavizado.
 
@@ -308,7 +308,7 @@ par(mfrow = c(3, 2))
 
 # a) Serie original vs ajustado
 ts.plot(y3, col = "darkgrey", main = "Serie vs Ajuste (suavizado)")
-lines(ajuste, col = "red")
+lines(ajuste, col = "darkcyan")
 
 # b) Residuos en el tiempo
 plot(residuos, main = "Residuos del modelo", ylab = "Residuo")
@@ -317,16 +317,16 @@ plot(residuos, main = "Residuos del modelo", ylab = "Residuo")
 Acf(residuos, main = "ACF de residuos")
 
 # d) Histograma + QQ
-hist(residuos, breaks = 70, main = "Distribución de residuos", xlab = "Residuo")
-qqnorm(residuos); qqline(residuos, col = "red")
+hist(residuos, breaks = 70, main = "Distribución de residuos", xlab = "Residuo" , col = "darkcyan")
+qqnorm(residuos); qqline(residuos, col = "darkcyan")
 ```
-En la primera imagen vemos el ajuste del modelo en rojo junto con la serie logarítmica en gris, se puede ver que el modelo reproduce adecuadamente el nivel y la estacionalidad principal de la serie, capturando la dinámica de largo plazo y el patrón anual dominante. El ajuste suavizado sigue de cerca la trayectoria promedio de los datos, aunque no pretende capturar la variabilidad de alta frecuencia.
+En la primera imagen vemos el ajuste del modelo en azul junto con la serie logarítmica en gris, se puede ver que el modelo reproduce adecuadamente el nivel y la estacionalidad principal de la serie, capturando la dinámica de largo plazo y el patrón anual dominante. El ajuste suavizado sigue de cerca la trayectoria promedio de los datos, aunque no pretende capturar la variabilidad de alta frecuencia.
 
 Por otro lado Tenemos en la segunda imágen los residuos del modelo, los cuales parecen oscilar en un inicio alrededor de cero, sin embargo parecen tener un leve desplazamiento al final del periodo, a pesar de esto, parecen presentar una variabilidad constante, lo que nos puede indicar que no hay problemas de heteroscedásticidad, de lo cual se profundizará más adelante. Tambien pudimos observar en el histograma y en el qq-plot una distribución aproximadamente normal de los residuales.
 
 Finalmente la función de autocorrelación de los residuales muestra correlaciones positivas significativas en varios rezagos, lo que indica que persiste dependencia temporal no explicada completamente por el modelo. Esto sugiere la presencia de estructura adicional, posiblemente estacional o de corto plazo, que no fue capturada por el componente suavizado.
 
-```{r}
+```{r fig.height=7, fig.width=10}
 # --- 1. Obtener residuos de 1 paso adelante (una-pass) ---
 residuos <- residuals(y3_filtro, type = "raw")
 
@@ -336,7 +336,7 @@ par(mfrow = c(3, 2))
 # a) Serie original vs ajustado
 ajuste <- nivel_filtro + estacional_filtro
 plot(y3, col = "darkgrey", main = "Serie vs Ajuste filtrado")
-lines(ajuste, col = "red")
+lines(ajuste, col = "darkcyan")
 
 
 # b) Residuos en el tiempo
@@ -346,9 +346,10 @@ plot(residuos$res, main = "Residuos del modelo", ylab = "Residuo")
 Acf(residuos$res, main = "ACF de residuos")
 
 # d) Histograma + QQ
-hist(residuos$res, breaks = 70, main = "Distribución de residuos", xlab = "Residuo")
-qqnorm(residuos$res); qqline(residuos$res, col = "red")
+hist(residuos$res, breaks = 70, main = "Distribución de residuos", xlab = "Residuo", , col = "darkcyan")
+qqnorm(residuos$res); qqline(residuos$res, col = "darkcyan")
 ```
+
 Como se mencionó anteriormente el modelo captura adecuadamente la dinámica despues del primer año. 
 
 Analizando los residuales del modelo filtrado se observa que estos oscilan alrededor de cero a lo largo del período de estudio. Durante el primer año se aprecia una mayor variabilidad, lo cual puede atribuirse al efecto de inicialización del filtro de Kalman; posteriormente, la varianza se estabiliza y permanece aproximadamente constante en los períodos siguientes, lo que sugiere homoscedasticidad.
