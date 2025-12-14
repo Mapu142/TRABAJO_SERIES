@@ -5,7 +5,7 @@ author:
   - Laura Katherin Martinez Castiblanco
   - Yudy Vanessa Puerres Rosero
 date: "2025-12-13"
-output: pdf_document
+#output: pdf_document
 ---
 
 ```{r, include=FALSE}
@@ -41,7 +41,7 @@ library(dlm) # para modelo estructural
 ## Base de datos
 
 La base de datos utilizada proviene del conjunto de datos público disponible en la plataforma Kaggle ([Rohan Rao, 2020](https://www.kaggle.com/datasets/rohanrao/air-quality-data-in-india)).
-Este conjunto fue recopilado originalmente por el Central Pollution Control Board (CPCB**)**, organismo oficial del Gobierno de la India encargado del monitoreo ambiental.
+Este conjunto fue recopilado originalmente por el Central Pollution Control Board (CPCB), organismo oficial del Gobierno de la India encargado del monitoreo ambiental.
 
 Para este estudio, se utilizó la versión diaria del conjunto de datos, enfocándose exclusivamente en la variable PM2.5 (µg/m³) (partículas en suspensión con diámetro aerodinámico $\leq$ 2.5 µm) registrada en la ciudad de Delhi.
 La serie abarca el período comprendido entre el 1 de enero de 2015 y el 6 de diciembre de 2020, con observaciones diarias.
@@ -106,7 +106,7 @@ aire$`PM2.5` <- na.approx(aire$`PM2.5`)
 
 # Verificar que no haya más valores faltantes en 'PM2.5'
 missing_pm25_after_imputation <- sum(is.na(aire$`PM2.5`))
-cat("Número de datos faltantes en 'PM2.5' después de la imputación:", missing_pm25_after_imputation, "\n")
+cat("Número de datos faltantes en 'PM2.5' después de la imputacion:", missing_pm25_after_imputation, "\n")
 ```
 
 Las estadísticas resumen de la serie de PM2.5 revelan una distribución altamente asimétrica hacia la derecha, con una media de 117.104 µg/m³, una mediana de 94.49 µg/m³ y un máximo extremo de 685.36 µg/m³.
@@ -167,7 +167,7 @@ pacf(PM2.5, lag.max = 50, main = "PACF - Zoom (1/4 de año)", col = "darkcyan", 
 Podemos ver picos altos en los lag $0$, $1$ y $2$ en el ACF, los cuales son decrecientes y hacen referencia a la estacionalidad anual, es decir el lag 1 hace referencia al día 365 (1 año), el lag 2 al día 730 (2 años).
 
 Para evaluar formalmente la estacionariedad en media (la cual segun gráficos parece ser estacionaria), se usa la prueba de Dickey-Fuller (ADF).
-El estadístico resultante fue -4.7414 con un p-valor \< 0.01, lo que permite rechazar la hipótesis nula de raíz unitaria.
+El estadístico resultante fue -8.233 con un p-valor \< 0.01, lo que permite rechazar la hipótesis nula de raíz unitaria.
 Por lo tanto, la serie se considera estacionaria.
 
 ```{r}
@@ -183,7 +183,7 @@ plot(stl(PM2.5, s.window = "periodic"), col = "darkcyan", lwd = 1.25)
 ```
 
 Dada la heterocedasticidad, se evaluo una transformación para estabilizar la varianza.
-Se estimó el parámetro de Box-Cox, obteniéndo $\lambda$ $\approx$ 0.257, cercano a cero.
+Se estimó el parámetro de Box-Cox, obteniéndo $\lambda$ $\approx$ 0.105, cercano a cero.
 Por lo cual se aplicó la transformación logarítmica.
 
 ```{r fig.height=4, fig.width=10}
@@ -197,15 +197,15 @@ ts.plot(l.PM2.5, col = "darkcyan", lwd = 1.25,
         main = "Serie transformada logarítmicamente")
 ```
 
-La serie transformada presenta una varianza más homogénea y mantiene la estacionariedad en media (prueba ADF con p-valor $\approx$ 0.027), sin embargo, a su vez mantiene la estacionalidad anual.
+
+La serie transformada presenta una varianza más homogénea y mantiene la estacionariedad en media (prueba ADF con p-valor < 0.01), sin embargo, a su vez mantiene la estacionalidad anual.
 
 ```{r}
 adf.test(l.PM2.5,alternative = "stationary")
 ```
 
-Luego de aplicar la transformación logarítmica a la serie de PM2.5, el test de Dickey–Fuller Aumentado (ADF) arrojó un estadístico de -3.65 con un p-valor de 0.027, lo que indicaría estacionariedad a un nivel de significancia del 5%.
+uego de aplicar la transformación logarítmica a la serie de PM2.5, el test de Dickey–Fuller Aumentado (ADF) arrojó un estadístico de -7.701 con un p-valor < 0.01, lo que indicaría estacionariedad a un nivel de significancia del 5%.
 Sin embargo, la inspección de la función de autocorrelación (ACF) revela un decaimiento lento, señal de persistencia temporal y posible estacionalidad anual.
-
 A su vez se observa en la descomposición STL que la estructura estacional anual persiste con patrones cíclicos bien definidos cada año.
 Ademas al evaluar los residuales reflejan un comportamiento aleatorio, luego la transformación permite capturar adecuadamente la serie.
 
@@ -213,58 +213,53 @@ Ademas al evaluar los residuales reflejan un comportamiento aleatorio, luego la 
 # Descomposición STL 
 plot(stl(l.PM2.5, s.window = "periodic"), col = "darkcyan", lwd = 1.25)
 ```
-```{r}
-Ft = matrix(c(1,1,rep(0,363)), nrow = 1)
-Gt <- matrix(0, nrow = 365, ncol = 365)
 
-## Nivel
-Gt[1, 1] <- 1
 
-## Corrimiento estacional
-# s_t -> s_{t+1}, s_{t+1} -> s_{t+2}, ...
-for (i in 2:(365 - 1)) {
-  Gt[i, i + 1] <- 1
-}
 
-## Restricción estacional (última fila)
-Gt[365, 2:365] <- -1
-mod3.manual <- dlm(FF=Ft, GG=Gt, m0=rep(0,365), C0=1e2*diag(3), V=2, W=diag(rep(0,3)))
-y3.filtro.manual <- dlmFilter(y3, mod3.manual)
-# cbind(y3.filtro$m[,1], y3.filtro.manual$m[,1])
-y3.suave.manual <- dlmSmooth(y3, mod3.manual)
+```{r fig.height=5, fig.width=10}
 
-par(mfrow = c(2,1))
-ts.plot(y3, col = "darkgrey")
-lines(dropFirst(y3.filtro.manual$m)[,1], lty = "longdash", col = 2)
-ts.plot(S_t)
+y3 <- l.PM2.5
 
-par(mfrow = c(2,1))
-ts.plot(y3, col = "darkgrey")
-lines(dropFirst(y3.suave.manual$s)[,1], lty = "longdash", col = 3)
-ts.plot(S_t)
+# Modelo optimizado: Nivel local + Estacional trigonométrica (4 armónicos para anual)
+mod_trig <- dlmModPoly(order=1, dV=2, dW=0) +  # Nivel constante (W=0 para determinístico)
+            dlmModTrig(s=365, q=8, dV=0, dW=0)  # s=periodo, q=armónicos, varianzas fijas
 
-par(mfrow = c(1,1))
-ts.plot(y3, col = "darkgrey")
-lines(dropFirst(y3.filtro.manual$m)[,1], lty = "longdash", col = 2)
-lines(dropFirst(y3.suave.manual$s)[,1], lty = "longdash", col = 3)
+# Filtrado y suavizado
+system.time({  # Mide tiempo
+  y3_filtro <- dlmFilter(y3, mod_trig)
+  y3_suave <- dlmSmooth(y3, mod_trig)
+})
 
-par(mfrow = c(1,1))
-ts.plot(y3, col = "darkgrey")
-lines(dropFirst(y3.filtro.manual$m)[,1], lty = "longdash", col = 2)
-lines(S_t, lty = "longdash", col = "blue")
+# Extracción: Nivel en [,1], estacional en columnas siguientes (pares sin/cos)
+nivel_filtro <- dropFirst(y3_suave$s)[,1]
+estacional_filtro <- rowSums(dropFirst(y3_suave$s)[,2:ncol(y3_suave$s)])  # Suma armónicos
 
-par(mfrow = c(1,1))
-ts.plot(y3, col = "darkgrey")
-lines(dropFirst(y3.suave.manual$s)[,1], lty = "longdash", col = 3)
-lines(S_t, lty = "longdash", col = "blue")
-
-cbind(S_t, dropFirst(y3.filtro.manual$m)[,1], dropFirst(y3.suave.manual$s)[,1])
-
-par(mfrow = c(2,1))
-ts.plot(S_t, col = "darkgrey")
-lines(dropFirst(y3.filtro.manual$m)[,1], lty = "longdash", col = 2)
-
-ts.plot(S_t, col = "darkgrey")
-lines(dropFirst(y3.suave.manual$s)[,1], lty = "longdash", col = 3)
+# Plots comparativos (similar a tu código)
+par(mfrow=c(1,1))
+ts.plot(y3, col="darkgrey", main="Serie vs Nivel + Estacional (Filtro)")
+lines(nivel_filtro + estacional_filtro, col="red", lty=2)
 ```
 
+
+```{r fig.height=7, fig.width=10}
+# --- 1. Obtener residuos de 1 paso adelante (una-pass) ---
+residuos <- residuals(y3_suave, type = "raw")
+
+# --- 2. Gráficos de diagnóstico ---
+par(mfrow = c(3, 2))
+
+# a) Serie original vs ajustado
+ajuste <- nivel_filtro + estacional_filtro
+ts.plot(y3, col = "darkgrey", main = "Serie vs Ajuste")
+lines(ajuste, col = "red")
+
+# b) Residuos en el tiempo
+plot(residuos$res, main = "Residuos del modelo", ylab = "Residuo")
+
+# c) ACF de residuos
+Acf(residuos$res, main = "ACF de residuos")
+
+# d) Histograma + QQ
+hist(residuos$res, breaks = 30, main = "Distribución de residuos", xlab = "Residuo")
+qqnorm(residuos$res); qqline(residuos$res, col = "red")
+```
