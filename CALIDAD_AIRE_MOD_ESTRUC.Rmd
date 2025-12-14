@@ -253,7 +253,7 @@ a_k \cos\left(\frac{2\pi k t}{365}\right) +
 b_k \sin\left(\frac{2\pi k t}{365}\right)
 \right]
 $$ 
-donde $q=8$ es el número de armónicos utilizados para aproximar el ciclo anual.
+donde $q=16$ es el número de armónicos utilizados para aproximar el ciclo anual.
 
 
 
@@ -267,7 +267,7 @@ y3 <- l.PM2.5
 
 # Modelo optimizado: Nivel local + Estacional trigonométrica (8 armónicos para anual)
 mod_trig <- dlmModPoly(order=1, dV=2, dW=0) +  # Nivel constante (W=0 para determinístico)
-            dlmModTrig(s=365, q=8, dV=0, dW=0)  # s=periodo, q=armónicos, varianzas fijas
+            dlmModTrig(s=365, q=16, dV=0, dW=0)  # s=periodo, q=armónicos, varianzas fijas
 
 # Filtrado y suavizado
 system.time({  # Mide tiempo
@@ -276,30 +276,38 @@ system.time({  # Mide tiempo
 })
 
 # Extracción: Nivel en [,1], estacional en columnas siguientes (pares sin/cos)
-nivel_filtro <- dropFirst(y3_suave$s)[,1]
-estacional_filtro <- rowSums(dropFirst(y3_suave$s)[,2:ncol(y3_suave$s)])  # Suma armónicos
+nivel_filtro <- dropFirst(y3_filtro$m)[,1]
+estacional_filtro <- rowSums(dropFirst(y3_filtro$m)[,2:ncol(y3_filtro$m)])  # Suma armónicos
+# Extracción: Nivel en [,1], estacional en columnas siguientes (pares sin/cos)
+nivel_suave <- dropFirst(y3_suave$s)[,1]
+estacional_suave <- rowSums(dropFirst(y3_suave$s)[,2:ncol(y3_suave$s)])  # Suma armónicos
+
 
 # Plots comparativos (similar a tu código)
-par(mfrow=c(1,1))
-ts.plot(y3, col="darkgrey", main="Serie vs Nivel + Estacional (Suavizado)")
+par(mfrow=c(1,2))
+ts.plot(y3, col="darkgrey", main="Serie vs Nivel + Estacional (filtro)")
 lines(nivel_filtro + estacional_filtro, col="red", lty=2)
+ts.plot(y3, col="darkgrey", main="Serie vs Nivel + Estacional (suavizado)")
+lines(nivel_suave + estacional_suave, col="red", lty=2)
 ```
-La Figura muestra la serie observada de PM2.5 en escala logarítmica (línea gris) junto con el ajuste obtenido a partir del modelo estructural en espacio–estado (línea roja discontinua), correspondiente a la suma del nivel estimado y la componente estacional anual. Se observa que el modelo logra capturar adecuadamente la dinámica general de la serie, reproduciendo de forma clara el patrón estacional anual caracterizado por picos recurrentes y valles pronunciados. Asimismo, el nivel estimado presenta una evolución suave en el tiempo, lo que sugiere cambios graduales en la concentración promedio de PM2.5. En conjunto, el ajuste indica que el modelo estructural proporciona una representación adecuada de la serie.
+La Figura muestra la serie observada de PM2.5 en escala logarítmica (línea gris) junto con el ajuste obtenido a partir del modelo estructural en espacio–estado (línea roja discontinua), correspondiente a la suma del nivel estimado y la componente estacional anual, para el método de suaviazdo y para el método de filtrafo. Se observa que el modelo suavizado logra capturar adecuadamente la dinámica general de la serie, reproduciendo de forma clara el patrón estacional anual caracterizado por picos recurrentes y valles pronunciados. Asimismo, el nivel estimado presenta una evolución suave en el tiempo, lo que sugiere cambios graduales en la concentración promedio de PM2.5. En conjunto, el ajuste indica que el modelo estructural proporciona una representación adecuada de la serie.
+
+Por otro lado el modelo filtrado durante el primer año se observa un comportamiento más inestable, asociado al proceso de inicialización del filtro de Kalman. A partir de este período transitorio, el ajuste filtrado converge y presenta un comportamiento similar al del suavizado.
 
 
 ## Validación del modelo: análisis de residuos del suavizado
 
-Los residuales se definieron como la diferencia entre la serie observada y el valor ajustado suavizado del modelo.
+Los residuales del modelo suavizado se definieron como la diferencia entre la serie observada y el valor ajustado suavizado del modelo.
 
 ```{r fig.height=7, fig.width=10}
-ajuste <- nivel_filtro + estacional_filtro
+ajuste <- nivel_suave + estacional_suave
 # --- 1. Obtener residuos de 1 paso adelante (una-pass) ---
 residuos <- y3-ajuste
 # --- 2. Gráficos de diagnóstico ---
 par(mfrow = c(3, 2))
 
 # a) Serie original vs ajustado
-ts.plot(y3, col = "darkgrey", main = "Serie vs Ajuste")
+ts.plot(y3, col = "darkgrey", main = "Serie vs Ajuste (suavizado)")
 lines(ajuste, col = "red")
 
 # b) Residuos en el tiempo
@@ -309,7 +317,7 @@ plot(residuos, main = "Residuos del modelo", ylab = "Residuo")
 Acf(residuos, main = "ACF de residuos")
 
 # d) Histograma + QQ
-hist(residuos, breaks = 30, main = "Distribución de residuos", xlab = "Residuo")
+hist(residuos, breaks = 70, main = "Distribución de residuos", xlab = "Residuo")
 qqnorm(residuos); qqline(residuos, col = "red")
 ```
 En la primera imagen vemos el ajuste del modelo en rojo junto con la serie logarítmica en gris, se puede ver que el modelo reproduce adecuadamente el nivel y la estacionalidad principal de la serie, capturando la dinámica de largo plazo y el patrón anual dominante. El ajuste suavizado sigue de cerca la trayectoria promedio de los datos, aunque no pretende capturar la variabilidad de alta frecuencia.
@@ -319,17 +327,42 @@ Por otro lado Tenemos en la segunda imágen los residuos del modelo, los cuales 
 Finalmente la función de autocorrelación de los residuales muestra correlaciones positivas significativas en varios rezagos, lo que indica que persiste dependencia temporal no explicada completamente por el modelo. Esto sugiere la presencia de estructura adicional, posiblemente estacional o de corto plazo, que no fue capturada por el componente suavizado.
 
 ```{r}
-# Ljung-Box para varios rezagos
-Box.test(residuos, lag = 20, type = "Ljung-Box")
-```
-Debido a que se obtuvo un p-valor menor al nivel de significancia (0.05) no se rechaza la posible autocorrelación estacional en los residuales, confirmando las sospechas que se tenían del ACF de estos.
+# --- 1. Obtener residuos de 1 paso adelante (una-pass) ---
+residuos <- residuals(y3_filtro, type = "raw")
 
-```{r}
-tseries::jarque.bera.test(residuos)
-```
-Con un valor tan pequeño en la prueba, rechazamos la hipótesis de que los residuales vienen de uns distribución normal
+# --- 2. Gráficos de diagnóstico ---
+par(mfrow = c(3, 2))
 
-```{r}
-bptest(residuos ~ time(residuos))
+# a) Serie original vs ajustado
+ajuste <- nivel_filtro + estacional_filtro
+plot(y3, col = "darkgrey", main = "Serie vs Ajuste filtrado")
+lines(ajuste, col = "red")
+
+
+# b) Residuos en el tiempo
+plot(residuos$res, main = "Residuos del modelo", ylab = "Residuo")
+
+# c) ACF de residuos
+Acf(residuos$res, main = "ACF de residuos")
+
+# d) Histograma + QQ
+hist(residuos$res, breaks = 70, main = "Distribución de residuos", xlab = "Residuo")
+qqnorm(residuos$res); qqline(residuos$res, col = "red")
 ```
-Con un valor pequeño rechazamos la hipótesis de igualdad de varianzas.
+Como se mencionó anteriormente el modelo captura adecuadamente la dinámica despues del primer año. 
+
+Analizando los residuales del modelo filtrado se observa que estos oscilan alrededor de cero a lo largo del período de estudio. Durante el primer año se aprecia una mayor variabilidad, lo cual puede atribuirse al efecto de inicialización del filtro de Kalman; posteriormente, la varianza se estabiliza y permanece aproximadamente constante en los períodos siguientes, lo que sugiere homoscedasticidad.
+
+Asimismo, el histograma de los residuales muestra una distribución aproximadamente simétrica alrededor de cero y el gráfico Q–Q indica un comportamiento cercano a la normalidad, con desviaciones menores en los extremos.
+
+Si bien se observan correlaciones significativas en algunos rezagos aislados, no se aprecia una estructura de autocorrelación persistente, lo que sugiere que el modelo captura adecuadamente la dependencia temporal principal.
+
+## Conlusiones
+
+* Ambos modelos representan bien la tendencia y la estacionalidad, pero el suavizado ofrece un ajuste más estable desde el inicio.
+
+* El modelo suavizado representa la dinámica de largo plazo y la estacionalidad principal, pero podría faltar capturar estructura adicional de corto plazo o efectos residuales.
+
+* El modelo filtrado es adecuado para representar la serie después del periodo de inicialización, con buena captura de tendencia, estacionalidad y dependencia temporal.
+
+* Para análisis descriptivo y visualización de patrones generales, el suavizado es preferible; para pronósticos paso a paso y análisis de series temporales, el filtrado es más adecuado.
