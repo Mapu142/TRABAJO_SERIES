@@ -6,6 +6,9 @@ author:
   - Yudy Vanessa Puerres Rosero
 date: "2025-12-13"
 #output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: sentence
 ---
 
 ```{r, include=FALSE}
@@ -36,6 +39,7 @@ library(zoo) #imputación de datos faltantes
 library(nortest) # para prueba kolmogorov
 library(dlm) # para modelo estructural
 ```
+
 # Descripción de los datos:
 
 ## Base de datos
@@ -112,20 +116,22 @@ cat("Número de datos faltantes en 'PM2.5' después de la imputacion:", missing_
 Las estadísticas resumen de la serie de PM2.5 revelan una distribución altamente asimétrica hacia la derecha, con una media de 117.104 µg/m³, una mediana de 94.49 µg/m³ y un máximo extremo de 685.36 µg/m³.
 
 ```{r paged.print=TRUE}
-# Estadísticas descriptivas
 summary_stats <- aire %>%
   summarise(
-    Media = mean(PM2.5, na.rm = TRUE),
-    Mediana = median(PM2.5, na.rm = TRUE),
-    Desv_Est = sd(PM2.5, na.rm = TRUE),
-    Min = min(PM2.5, na.rm = TRUE),
-    Max = max(PM2.5, na.rm = TRUE)
+    Media = mean(`PM2.5`, na.rm = TRUE),
+    Mediana = median(`PM2.5`, na.rm = TRUE),
+    Desv_Est = sd(`PM2.5`, na.rm = TRUE),
+    Min = min(`PM2.5`, na.rm = TRUE),
+    Max = max(`PM2.5`, na.rm = TRUE)
   )
 
-kable(summary_stats, digits = 3, caption = "Estadísticas descriptivas de PM2.5 ")
+knitr::kable(summary_stats, digits = 3, caption = "Estadísticas descriptivas de PM2.5")
+
+
 ```
 
 # Identificación de modelos
+
 La gráfica de la serie de tiempo muestra una variabilidad, con estacionalidad clara (patrones repetidos, que parecieran ser anuales).
 Aunque no se observa una tendencia, la varianza no es constante puesto que los picos son más pronunciados en ciertos períodos del año, lo que sugiere heterocedasticidad.
 
@@ -164,6 +170,7 @@ pacf(PM2.5, lag.max = 800, main = "PACF - 2 años", col = "darkcyan", lwd = 1)
 acf(PM2.5, lag.max = 200, main = "ACF - Zoom (1er año)", col = "darkcyan", lwd = 1)   # ajusta lag.max al tamaño del subconjunto
 pacf(PM2.5, lag.max = 50, main = "PACF - Zoom (1/4 de año)", col = "darkcyan", lwd = 1.25)
 ```
+
 Podemos ver picos altos en los lag $0$, $1$ y $2$ en el ACF, los cuales son decrecientes y hacen referencia a la estacionalidad anual, es decir el lag 1 hace referencia al día 365 (1 año), el lag 2 al día 730 (2 años).
 
 Para evaluar formalmente la estacionariedad en media (la cual segun gráficos parece ser estacionaria), se usa la prueba de Dickey-Fuller (ADF).
@@ -197,14 +204,13 @@ ts.plot(l.PM2.5, col = "darkcyan", lwd = 1.25,
         main = "Serie transformada logarítmicamente")
 ```
 
-
-La serie transformada presenta una varianza más homogénea y mantiene la estacionariedad en media (prueba ADF con p-valor < 0.01), sin embargo, a su vez mantiene la estacionalidad anual.
+La serie transformada presenta una varianza más homogénea y mantiene la estacionariedad en media (prueba ADF con p-valor \< 0.01), sin embargo, a su vez mantiene la estacionalidad anual.
 
 ```{r}
 adf.test(l.PM2.5,alternative = "stationary")
 ```
 
-uego de aplicar la transformación logarítmica a la serie de PM2.5, el test de Dickey–Fuller Aumentado (ADF) arrojó un estadístico de -7.701 con un p-valor < 0.01, lo que indicaría estacionariedad a un nivel de significancia del 5%.
+Luego de aplicar la transformación logarítmica a la serie de PM2.5, el test de Dickey–Fuller Aumentado (ADF) arrojó un estadístico de -7.701 con un p-valor \< 0.01, lo que indicaría estacionariedad a un nivel de significancia del 5%.
 Sin embargo, la inspección de la función de autocorrelación (ACF) revela un decaimiento lento, señal de persistencia temporal y posible estacionalidad anual.
 A su vez se observa en la descomposición STL que la estructura estacional anual persiste con patrones cíclicos bien definidos cada año.
 Ademas al evaluar los residuales reflejan un comportamiento aleatorio, luego la transformación permite capturar adecuadamente la serie.
@@ -214,7 +220,36 @@ Ademas al evaluar los residuales reflejan un comportamiento aleatorio, luego la 
 plot(stl(l.PM2.5, s.window = "periodic"), col = "darkcyan", lwd = 1.25)
 ```
 
+# Modelo estructural en espacio–estado
 
+A partir de la serie diaria de PM2.5 (transformada logarítmicamente si se desea estabilizar la varianza), se plantea un modelo estructural en forma de espacio–estado compuesto por un nivel y un componente estacional anual.
+
+## Ecuación de observación
+
+$$
+y_t = \mu_t + s_t + \varepsilon_t, 
+\qquad \varepsilon_t \sim N(0, V)
+$$
+
+donde $y_t$ representa la serie observada ($y_t=\log(\text{PM2.5}_t)$), $\mu_t$ es el nivel (tendencia de largo plazo), $s_t$ es la componente estacional anual y $\varepsilon_t$ es el error de observación.
+
+## Ecuación de estado (nivel)
+
+Se considera un nivel local: $$
+\mu_t = \mu_{t-1} + \eta_t, 
+\qquad \eta_t \sim N(0, W_\mu)
+$$
+
+En caso de asumir nivel determinístico, se fija $W_\mu=0$.
+
+## Ecuación de estado (estacionalidad trigonométrica)
+
+La estacionalidad anual se modela mediante una representación trigonométrica (Fourier): $$
+s_t = \sum_{k=1}^{q}\left[
+a_k \cos\left(\frac{2\pi k t}{365}\right) +
+b_k \sin\left(\frac{2\pi k t}{365}\right)
+\right]
+$$ donde $q$ es el número de armónicos utilizados para aproximar el ciclo anual.
 
 ```{r fig.height=5, fig.width=10}
 
@@ -239,7 +274,6 @@ par(mfrow=c(1,1))
 ts.plot(y3, col="darkgrey", main="Serie vs Nivel + Estacional (Filtro)")
 lines(nivel_filtro + estacional_filtro, col="red", lty=2)
 ```
-
 
 ```{r fig.height=7, fig.width=10}
 # --- 1. Obtener residuos de 1 paso adelante (una-pass) ---
